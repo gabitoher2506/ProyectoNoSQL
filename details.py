@@ -26,6 +26,7 @@ def details(property_id):
         db_connection = MongoDBConnection()
         property_collection = db_connection.get_collection('Property')
         characteristics_collection = db_connection.get_collection('Characteristics_Property')
+        address_collection = db_connection.get_collection('Address')
 
         # Recuperar la propiedad usando el ID
         property = property_collection.find_one({'_id': ObjectId(property_id)})
@@ -39,6 +40,13 @@ def details(property_id):
         else:
             characteristics = {}
 
+        # Recuperar la dirección usando el id_address de la propiedad
+        address_id = property.get('id_address')
+        if address_id:
+            address = address_collection.find_one({'_id': ObjectId(address_id)})
+        else:
+            address = {}
+
         # Preparar los datos para la plantilla
         property_details = {
             'name': property.get('name', 'Nombre de la Propiedad'),
@@ -47,7 +55,8 @@ def details(property_id):
             'antiquity': property.get('antiquity', '0'),
             'owner': property.get('owner', 'Propietario'),
             'images': property.get('images', ['static/images/placeholder.jpg']),
-            'characteristics': characteristics or {}
+            'characteristics': characteristics or {},
+            'address': address or {}
         }
 
         db_connection.close()
@@ -83,23 +92,33 @@ def details(property_id):
                     padding: 1rem;
                     border-radius: 8px;
                     box-shadow: 0 0 10px rgba(0,0,0,0.1);
-                }
-                .property-images {
                     display: flex;
                     flex-wrap: wrap;
+                }
+                .property-images {
+                    flex: 1;
+                    display: flex;
+                    flex-direction: column;
                     gap: 10px;
                 }
                 .property-images img {
-                    width: 300px;
-                    height: 200px;
+                    width: 100%;
+                    height: auto;
                     object-fit: cover;
                     border-radius: 8px;
+                }
+                .property-info {
+                    flex: 1;
+                    padding: 0 1rem;
                 }
                 .property-info h2 {
                     margin-top: 0;
                 }
                 .property-info p {
                     margin: 0.5rem 0;
+                }
+                .property-address, .property-characteristics {
+                    margin-top: 1rem;
                 }
                 footer {
                     background-color: #333;
@@ -135,30 +154,38 @@ def details(property_id):
             </header>
             <div class="container">
                 <div class="property-details">
-                    <h2>{{ property.name }}</h2>
-                    <p><strong>Precio:</strong> ${{ property.price }}</p>
-                    <p><strong>Tipo de Transacción:</strong> {{ property.transaction_type }}</p
-                    <p><strong>Años de Antigüedad:</strong> {{ property.antiquity }}</p>
-                    <p><strong>Propietario:</strong> {{ property.owner }}</p>
                     <div class="property-images">
                         {% for image in property.images %}
                         <img src="{{ image }}" alt="Imagen de la propiedad">
                         {% endfor %}
                     </div>
-                    <div class="property-characteristics">
-                        <h3>Características</h3>
-                        <ul>
-                            <li><strong>Número de Habitaciones:</strong> {{ property.characteristics.number_rooms }}</li>
-                            <li><strong>Número de Baños:</strong> {{ property.characteristics.number_bathrooms }}</li>
-                            <li><strong>Descripción:</strong> {{ property.characteristics.description }}</li>
-                            <li><strong>Garage:</strong> {{ property.characteristics.garage }}</li>
-                            <li><strong>Pool:</strong> {{ property.characteristics.pool }}</li>
-                        </ul>
+                    <div class="property-info">
+                        <h2>{{ property.name }}</h2>
+                        <p><strong>Precio:</strong> ${{ property.price }}</p>
+                        <p><strong>Tipo de Transacción:</strong> {{ property.transaction_type }}</p>
+                        <p><strong>Años de Antigüedad:</strong> {{ property.antiquity }}</p>
+                        <p><strong>Propietario:</strong> {{ property.owner }}</p>
+                        <div class="property-address">
+                            <h3>Dirección</h3>
+                            <p><strong>Calle:</strong> {{ property.address.street }}</p>
+                            <p><strong>Provincia:</strong> {{ property.address.province }}</p>
+                            <p><strong>Cantón:</strong> {{ property.address.canton }}</p>
+                            <p><strong>Señales:</strong> {{ property.address.others_signs }}</p>
+                        </div>
+                        <div class="property-characteristics">
+                            <h3>Características</h3>
+                            <ul>
+                                <li><strong>Número de Habitaciones:</strong> {{ property.characteristics.number_rooms }}</li>
+                                <li><strong>Número de Baños:</strong> {{ property.characteristics.number_bathrooms }}</li>
+                                <li><strong>Descripción:</strong> {{ property.characteristics.description }}</li>
+                                <li><strong>Garage:</strong> {{ property.characteristics.garage }}</li>
+                                <li><strong>Pool:</strong> {{ property.characteristics.pool }}</li>
+                            </ul>
+                        </div>
+                        <a href="{{ url_for('contacto', property_id=property_id) }}" class="contact-button">Contactar Vendedor</a>
                     </div>
-                    <a href="{{ url_for('contacto', property_id=property_id) }}" class="contact-button">Contactar Vendedor</a>
                 </div>
             </div>
-            
         </body>
         </html>
         """
