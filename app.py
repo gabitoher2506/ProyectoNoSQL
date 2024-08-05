@@ -12,5 +12,8 @@ from login import *
 from register import register
 
 
+
+
+
 if __name__ == '__main__':
     app.run(debug=True)

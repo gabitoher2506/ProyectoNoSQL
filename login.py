@@ -170,9 +170,6 @@ def login():
                 <a href="/register" class="register-button">Registrarse</a>
             </div>
         </div>
-        <footer>
-            <p>&copy; 2024 Bienes Raíces. Todos los derechos reservados.</p>
-        </footer>
     </body>
     </html>
     """
