@@ -5,7 +5,6 @@ from bson import ObjectId
 
 # Utilizar la instancia de app desde app.py
 from app import app
-=======
 app = Flask(__name__)
 
 

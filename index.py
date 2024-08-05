@@ -4,7 +4,7 @@ from bson import ObjectId
 
 # Utilizar la instancia de app desde app.py
 from app import app
-=======
+
 app = Flask(__name__)
 
 class MongoDBConnection:
@@ -55,9 +55,6 @@ def index():
                 'owner': property.get('owner', 'Propietario'),
                 'images': image_urls,
                 'id': str(property.get('_id'))
-
-                'id': str(property.get('_id'))  # Convertir el ObjectId a cadena
-
             })
 
         db_connection.close()
