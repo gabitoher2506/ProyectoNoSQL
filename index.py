@@ -2,8 +2,7 @@ from flask import Flask, render_template_string, redirect, url_for
 from pymongo import MongoClient
 from bson import ObjectId
 
-# Utilizar la instancia de app desde app.py
-from app import app
+app = Flask(__name__)
 
 class MongoDBConnection:
     def __init__(self, uri='mongodb+srv://msolano80258:Francia9192@cluster0.6uxqadh.mongodb.net/?retryWrites=true&w=majority'):
@@ -67,6 +66,21 @@ def index():
                     margin: 0 auto;
                     overflow: hidden;
                 }
+                .login-button {
+                    position: absolute;
+                    top: 50%;
+                    right: 1rem;
+                    transform: translateY(-50%);
+                    background-color: #fff;
+                    color: #007BFF;
+                    border: none;
+                    padding: 0.5rem 1rem;
+                    border-radius: 5px;
+                    cursor: pointer;
+                }
+                .login-button:hover {
+                    background-color: #f0f0f0;
+                }
                 .property {
                     background: #fff;
                     margin: 1rem 0;
@@ -113,6 +127,9 @@ def index():
             <header>
                 <div class="container">
                     <h1>Bienes Raíces</h1>
+                    <a href="/login">
+                        <button class="login-button">Iniciar Sesión</button>
+                    </a>
                 </div>
             </header>
             <div class="container">
