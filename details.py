@@ -2,7 +2,8 @@ from flask import Flask, render_template_string, abort
 from pymongo import MongoClient
 from bson import ObjectId
 
-app = Flask(__name__)
+# Utilizar la instancia de app desde app.py
+from app import app
 
 class MongoDBConnection:
     def __init__(self, uri='mongodb+srv://msolano80258:Francia9192@cluster0.6uxqadh.mongodb.net/?retryWrites=true&w=majority'):
@@ -22,23 +23,23 @@ class MongoDBConnection:
 @app.route('/details/<property_id>')
 def details(property_id):
     try:
-        # Crear una instancia de MongoDBConnection
         db_connection = MongoDBConnection()
-
-        # Obtener la colección de propiedades
         property_collection = db_connection.get_collection('Property')
-        # Obtener la colección de características de la propiedad
         characteristics_collection = db_connection.get_collection('Characteristics_Property')
 
-        # Consultar la propiedad
+        # Recuperar la propiedad usando el ID
         property = property_collection.find_one({'_id': ObjectId(property_id)})
         if not property:
             return "Propiedad no encontrada", 404
 
-        # Consultar las características asociadas a la propiedad
-        characteristics = characteristics_collection.find_one({'_id': property.get('id_characteristics')})
+        # Recuperar las características usando el id_characteristics de la propiedad
+        characteristics_id = property.get('id_characteristics')
+        if characteristics_id:
+            characteristics = characteristics_collection.find_one({'_id': ObjectId(characteristics_id)})
+        else:
+            characteristics = {}
 
-        # Preparar datos para mostrar en la página de detalles
+        # Preparar los datos para la plantilla
         property_details = {
             'name': property.get('name', 'Nombre de la Propiedad'),
             'price': property.get('price', '0'),
@@ -51,7 +52,6 @@ def details(property_id):
 
         db_connection.close()
 
-        # HTML para la página de detalles
         html = """
         <!DOCTYPE html>
         <html lang="es">
@@ -121,21 +121,25 @@ def details(property_id):
             <div class="container">
                 <div class="property-details">
                     <h2>{{ property.name }}</h2>
+                    <p><strong>Precio:</strong> ${{ property.price }}</p>
+                    <p><strong>Tipo de Transacción:</strong> {{ property.transaction_type }}</p>
+                    <p><strong>Años de Antigüedad:</strong> {{ property.antiquity }}</p>
+                    <p><strong>Propietario:</strong> {{ property.owner }}</p>
                     <div class="property-images">
                         {% for image in property.images %}
                         <img src="{{ image }}" alt="Imagen de la propiedad">
                         {% endfor %}
                     </div>
-                    <p><strong>Precio:</strong> ${{ property.price }}</p>
-                    <p><strong>Tipo de Transacción:</strong> {{ property.transaction_type }}</p>
-                    <p><strong>Años de Antigüedad:</strong> {{ property.antiquity }}</p>
-                    <p><strong>Propietario:</strong> {{ property.owner }}</p>
-                    <h3>Características</h3>
-                    <p><strong>Número de Habitaciones:</strong> {{ property.characteristics.number_rooms }}</p>
-                    <p><strong>Número de Baños:</strong> {{ property.characteristics.number_bathrooms }}</p>
-                    <p><strong>Descripción:</strong> {{ property.characteristics.description }}</p>
-                    <p><strong>Garage:</strong> {{ property.characteristics.garage }}</p>
-                    <p><strong>Pool:</strong> {{ property.characteristics.pool }}</p>
+                    <div class="property-characteristics">
+                        <h3>Características</h3>
+                        <ul>
+                            <li><strong>Número de Habitaciones:</strong> {{ property.characteristics.number_rooms }}</li>
+                            <li><strong>Número de Baños:</strong> {{ property.characteristics.number_bathrooms }}</li>
+                            <li><strong>Descripción:</strong> {{ property.characteristics.description }}</li>
+                            <li><strong>Garage:</strong> {{ property.characteristics.garage }}</li>
+                            <li><strong>Pool:</strong> {{ property.characteristics.pool }}</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
             <footer>
@@ -144,13 +148,16 @@ def details(property_id):
         </body>
         </html>
         """
-        
+
         return render_template_string(html, property=property_details)
 
     except Exception as e:
         return f"Error en la operación de MongoDB: {e}"
+<<<<<<< Updated upstream
 
 if __name__ == '__main__':
     app.run(debug=True)
 
 .
+=======
+>>>>>>> Stashed changes
