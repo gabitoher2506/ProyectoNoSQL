@@ -1,4 +1,4 @@
-from flask import Flask, render_template_string, abort
+from flask import Flask, render_template_string, abort, redirect, url_for
 from pymongo import MongoClient
 from bson import ObjectId
 
@@ -110,6 +110,21 @@ def details(property_id):
                     bottom: 0;
                     width: 100%;
                 }
+                .contact-button {
+                    display: block;
+                    width: 100%;
+                    padding: 1rem;
+                    font-size: 1rem;
+                    color: #fff;
+                    background-color: #007BFF;
+                    text-align: center;
+                    text-decoration: none;
+                    border-radius: 5px;
+                    margin-top: 1rem;
+                }
+                .contact-button:hover {
+                    background-color: #0056b3;
+                }
             </style>
         </head>
         <body>
@@ -122,7 +137,7 @@ def details(property_id):
                 <div class="property-details">
                     <h2>{{ property.name }}</h2>
                     <p><strong>Precio:</strong> ${{ property.price }}</p>
-                    <p><strong>Tipo de Transacción:</strong> {{ property.transaction_type }}</p>
+                    <p><strong>Tipo de Transacción:</strong> {{ property.transaction_type }}</p
                     <p><strong>Años de Antigüedad:</strong> {{ property.antiquity }}</p>
                     <p><strong>Propietario:</strong> {{ property.owner }}</p>
                     <div class="property-images">
@@ -140,16 +155,15 @@ def details(property_id):
                             <li><strong>Pool:</strong> {{ property.characteristics.pool }}</li>
                         </ul>
                     </div>
+                    <a href="{{ url_for('contacto', property_id=property_id) }}" class="contact-button">Contactar Vendedor</a>
                 </div>
             </div>
-            <footer>
-                <p>&copy; 2024 Bienes Raíces. Todos los derechos reservados.</p>
-            </footer>
+            
         </body>
         </html>
         """
 
-        return render_template_string(html, property=property_details)
+        return render_template_string(html, property=property_details, property_id=property_id)
 
     except Exception as e:
         return f"Error en la operación de MongoDB: {e}"
