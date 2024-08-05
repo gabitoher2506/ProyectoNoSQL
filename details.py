@@ -2,8 +2,12 @@ from flask import Flask, render_template_string, abort
 from pymongo import MongoClient
 from bson import ObjectId
 
+
 # Utilizar la instancia de app desde app.py
 from app import app
+=======
+app = Flask(__name__)
+
 
 class MongoDBConnection:
     def __init__(self, uri='mongodb+srv://msolano80258:Francia9192@cluster0.6uxqadh.mongodb.net/?retryWrites=true&w=majority'):
@@ -23,14 +27,27 @@ class MongoDBConnection:
 @app.route('/details/<property_id>')
 def details(property_id):
     try:
+
         db_connection = MongoDBConnection()
         property_collection = db_connection.get_collection('Property')
         characteristics_collection = db_connection.get_collection('Characteristics_Property')
 
         # Recuperar la propiedad usando el ID
+
+        # Crear una instancia de MongoDBConnection
+        db_connection = MongoDBConnection()
+
+        # Obtener la colección de propiedades
+        property_collection = db_connection.get_collection('Property')
+        # Obtener la colección de características de la propiedad
+        characteristics_collection = db_connection.get_collection('Characteristics_Property')
+
+        # Consultar la propiedad
+
         property = property_collection.find_one({'_id': ObjectId(property_id)})
         if not property:
             return "Propiedad no encontrada", 404
+
 
         # Recuperar las características usando el id_characteristics de la propiedad
         characteristics_id = property.get('id_characteristics')
@@ -40,6 +57,12 @@ def details(property_id):
             characteristics = {}
 
         # Preparar los datos para la plantilla
+
+        # Consultar las características asociadas a la propiedad
+        characteristics = characteristics_collection.find_one({'_id': property.get('id_characteristics')})
+
+        # Preparar datos para mostrar en la página de detalles
+
         property_details = {
             'name': property.get('name', 'Nombre de la Propiedad'),
             'price': property.get('price', '0'),
@@ -140,6 +163,16 @@ def details(property_id):
                             <li><strong>Pool:</strong> {{ property.characteristics.pool }}</li>
                         </ul>
                     </div>
+                    <p><strong>Precio:</strong> ${{ property.price }}</p>
+                    <p><strong>Tipo de Transacción:</strong> {{ property.transaction_type }}</p>
+                    <p><strong>Años de Antigüedad:</strong> {{ property.antiquity }}</p>
+                    <p><strong>Propietario:</strong> {{ property.owner }}</p>
+                    <h3>Características</h3>
+                    <p><strong>Número de Habitaciones:</strong> {{ property.characteristics.number_rooms }}</p>
+                    <p><strong>Número de Baños:</strong> {{ property.characteristics.number_bathrooms }}</p>
+                    <p><strong>Descripción:</strong> {{ property.characteristics.description }}</p>
+                    <p><strong>Garage:</strong> {{ property.characteristics.garage }}</p>
+                    <p><strong>Pool:</strong> {{ property.characteristics.pool }}</p>
                 </div>
             </div>
             <footer>
@@ -153,11 +186,9 @@ def details(property_id):
 
     except Exception as e:
         return f"Error en la operación de MongoDB: {e}"
-<<<<<<< Updated upstream
+
 
 if __name__ == '__main__':
     app.run(debug=True)
 
-.
-=======
->>>>>>> Stashed changes
+
