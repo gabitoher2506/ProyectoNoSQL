@@ -201,6 +201,12 @@ def index():
 
 @app.route('/add_property', methods=['GET', 'POST'])
 def add_property():
+    db_connection = MongoDBConnection()
+    property_collection = db_connection.get_collection('Property')
+    characteristics_collection = db_connection.get_collection('Characteristics_Property')
+    address_collection = db_connection.get_collection('Address')
+    agent_collection = db_connection.get_collection('Agent')
+
     if request.method == 'POST':
         # Obtener datos del formulario
         name = request.form.get('name')
@@ -208,6 +214,10 @@ def add_property():
         transaction_type = request.form.get('transaction_type')
         antiquity = request.form.get('antiquity')
         owner = request.form.get('owner')
+        agent_id = request.form.get('agent_id')
+
+        # Convertir agent_id a ObjectId
+        agent_id = ObjectId(agent_id)
 
         # Obtener características
         number_rooms = request.form.get('number_rooms')
@@ -238,15 +248,6 @@ def add_property():
                 except Exception as e:
                     print(f"Error al descargar la imagen: {e}")
 
-        # Obtener el ID del agente seleccionado
-        agent_id = request.form.get('agent_id')
-
-        # Conectar a MongoDB y guardar la propiedad
-        db_connection = MongoDBConnection()
-        property_collection = db_connection.get_collection('Property')
-        characteristics_collection = db_connection.get_collection('Characteristics_Property')
-        address_collection = db_connection.get_collection('Address')
-
         # Guardar dirección
         address_id = address_collection.insert_one({
             'street': street,
@@ -273,18 +274,15 @@ def add_property():
             'owner': owner,
             'id_characteristics': characteristics_id,
             'id_address': address_id,
-            'images': image_data,  # Guardar imágenes como array de binarios
-            'agent_id': agent_id  # Guardar ID del agente
+            'images': image_urls,  # Guardar imágenes como array de binarios
+            'agent_id': agent_id  # Guardar agent_id como ObjectId
         })
 
         db_connection.close()
         return redirect(url_for('index'))  # Asegúrate de que 'index' sea una ruta válida
 
-    # Obtener los agentes disponibles
-    db_connection = MongoDBConnection()
-    agents_collection = db_connection.get_collection('Agent')
-    agents = agents_collection.find()
-    db_connection.close()
+    # Obtener lista de agentes
+    agents = list(agent_collection.find({}))
 
     html = """
     <!DOCTYPE html>
@@ -376,6 +374,14 @@ def add_property():
 
                 <label for="owner">Propietario:</label>
                 <input type="text" id="owner" name="owner" required>
+                
+                <h3>Agente</h3>
+                <label for="agent_id">Seleccionar Agente:</label>
+                <select id="agent_id" name="agent_id" required>
+                    {% for agent in agents %}
+                    <option value="{{ agent['_id'] }}">{{ agent['name'] }}</option>
+                    {% endfor %}
+                </select>
 
                 <h3>Características</h3>
                 <label for="number_rooms">Número de Habitaciones:</label>
@@ -415,14 +421,6 @@ def add_property():
                 <h3>Imágenes</h3>
                 <label for="image_url">URL de Imagen (puedes agregar varias):</label>
                 <input type="text" id="image_url" name="image_url" placeholder="https://ejemplo.com/imagen.jpg">
-
-                <h3>Agente</h3>
-                <label for="agent_id">Selecciona un Agente:</label>
-                <select id="agent_id" name="agent_id" required>
-                    {% for agent in agents %}
-                    <option value="{{ agent['_id'] }}">{{ agent['name'] }}</option>
-                    {% endfor %}
-                </select>
 
                 <button type="submit">Agregar Propiedad</button>
             </form>
