@@ -202,24 +202,89 @@ def index():
 @app.route('/add_property', methods=['GET', 'POST'])
 def add_property():
     if request.method == 'POST':
-        try:
-            new_property = {
-                'name': request.form.get('name'),
-                'price': float(request.form.get('price')),
-                'transaction_type': request.form.get('transaction_type'),
-                'antiquity': int(request.form.get('antiquity')),
-                'owner': request.form.get('owner'),
-                'images': []  # Add logic for images if needed
-            }
+        # Obtener datos del formulario
+        name = request.form.get('name')
+        price = request.form.get('price')
+        transaction_type = request.form.get('transaction_type')
+        antiquity = request.form.get('antiquity')
+        owner = request.form.get('owner')
 
-            db_connection = MongoDBConnection()
-            property_collection = db_connection.get_collection('Property')
-            property_collection.insert_one(new_property)
-            db_connection.close()
-            return redirect(url_for('index'))
+        # Obtener características
+        number_rooms = request.form.get('number_rooms')
+        number_bathrooms = request.form.get('number_bathrooms')
+        description = request.form.get('description')
+        garage = request.form.get('garage')
+        pool = request.form.get('pool')
 
-        except Exception as e:
-            return f"Error al agregar la propiedad: {e}"
+        # Obtener dirección
+        street = request.form.get('street')
+        province = request.form.get('province')
+        canton = request.form.get('canton')
+        others_signs = request.form.get('others_signs')
+
+        # Obtener URL de la imagen
+        image_urls = request.form.getlist('image_url')  # Para manejar múltiples URLs
+        image_data = []
+        for image_url in image_urls:
+            if image_url:
+                try:
+                    # Descargar la imagen desde la URL
+                    response = requests.get(image_url)
+                    if response.status_code == 200:
+                        image_data.append(response.content)
+                    else:
+                        # Manejar el caso en que la imagen no se pueda descargar
+                        print(f"Error al descargar la imagen: {image_url}")
+                except Exception as e:
+                    print(f"Error al descargar la imagen: {e}")
+
+        # Obtener el ID del agente seleccionado
+        agent_id = request.form.get('agent_id')
+
+        # Conectar a MongoDB y guardar la propiedad
+        db_connection = MongoDBConnection()
+        property_collection = db_connection.get_collection('Property')
+        characteristics_collection = db_connection.get_collection('Characteristics_Property')
+        address_collection = db_connection.get_collection('Address')
+
+        # Guardar dirección
+        address_id = address_collection.insert_one({
+            'street': street,
+            'province': province,
+            'canton': canton,
+            'others_signs': others_signs
+        }).inserted_id
+
+        # Guardar características
+        characteristics_id = characteristics_collection.insert_one({
+            'number_rooms': number_rooms,
+            'number_bathrooms': number_bathrooms,
+            'description': description,
+            'garage': garage,
+            'pool': pool
+        }).inserted_id
+
+        # Guardar propiedad
+        property_collection.insert_one({
+            'name': name,
+            'price': price,
+            'transaction_type': transaction_type,
+            'antiquity': antiquity,
+            'owner': owner,
+            'id_characteristics': characteristics_id,
+            'id_address': address_id,
+            'images': image_data,  # Guardar imágenes como array de binarios
+            'agent_id': agent_id  # Guardar ID del agente
+        })
+
+        db_connection.close()
+        return redirect(url_for('index'))  # Asegúrate de que 'index' sea una ruta válida
+
+    # Obtener los agentes disponibles
+    db_connection = MongoDBConnection()
+    agents_collection = db_connection.get_collection('Agent')
+    agents = agents_collection.find()
+    db_connection.close()
 
     html = """
     <!DOCTYPE html>
@@ -236,86 +301,136 @@ def add_property():
                 background-color: #f4f4f4;
             }
             header {
-                background-color: #007BFF;
+                background-color: #333;
                 color: #fff;
-                padding: 1rem 0;
+                padding: 10px 0;
                 text-align: center;
             }
-            .container {
-                width: 80%;
+            main {
+                padding: 20px;
+                max-width: 600px;
                 margin: 0 auto;
-                overflow: hidden;
+                background-color: #fff;
+                border-radius: 5px;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             }
-            form {
-                background: #fff;
-                padding: 1rem;
-                border-radius: 8px;
-                box-shadow: 0 0 10px rgba(0,0,0,0.1);
-                display: flex;
-                flex-direction: column;
+            h1 {
+                margin-bottom: 20px;
+                font-size: 24px;
             }
             label {
-                margin: 0.5rem 0;
+                display: block;
+                margin: 10px 0 5px;
+                font-size: 14px;
             }
             input[type="text"],
             input[type="number"],
-            input[type="submit"] {
-                padding: 0.5rem;
+            textarea,
+            select {
+                width: 100%;
+                padding: 6px;
+                margin-bottom: 10px;
                 border: 1px solid #ddd;
-                border-radius: 5px;
-                margin: 0.5rem 0;
-                font-size: 1rem;
+                border-radius: 4px;
+                font-size: 14px;
             }
-            input[type="submit"] {
-                background-color: #007BFF;
-                color: #fff;
-                border: none;
-                cursor: pointer;
+            textarea {
+                resize: vertical;
             }
-            input[type="submit"]:hover {
-                background-color: #0056b3;
-            }
-            footer {
+            button {
                 background-color: #333;
                 color: #fff;
-                text-align: center;
-                padding: 1rem 0;
-                position: fixed;
-                bottom: 0;
-                width: 100%;
+                padding: 8px 12px;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 14px;
+            }
+            button:hover {
+                background-color: #555;
+            }
+            h3 {
+                margin-top: 20px;
+                margin-bottom: 10px;
+                font-size: 18px;
             }
         </style>
     </head>
     <body>
         <header>
-            <div class="container">
-                <h1>Agregar Nueva Propiedad</h1>
-            </div>
+            <h1>Agregar Nueva Propiedad</h1>
         </header>
-        <div class="container">
-            <form action="/add_property" method="POST">
-                <label for="name">Nombre:</label>
+        <main>
+            <form method="POST">
+                <label for="name">Nombre de la Propiedad:</label>
                 <input type="text" id="name" name="name" required>
-                
+
                 <label for="price">Precio:</label>
-                <input type="number" id="price" name="price" step="0.01" required>
-                
+                <input type="text" id="price" name="price" required>
+
                 <label for="transaction_type">Tipo de Transacción:</label>
                 <input type="text" id="transaction_type" name="transaction_type" required>
-                
+
                 <label for="antiquity">Años de Antigüedad:</label>
-                <input type="number" id="antiquity" name="antiquity" required>
-                
+                <input type="text" id="antiquity" name="antiquity" required>
+
                 <label for="owner">Propietario:</label>
                 <input type="text" id="owner" name="owner" required>
-                
-                <input type="submit" value="Agregar Propiedad">
+
+                <h3>Características</h3>
+                <label for="number_rooms">Número de Habitaciones:</label>
+                <input type="number" id="number_rooms" name="number_rooms" required>
+
+                <label for="number_bathrooms">Número de Baños:</label>
+                <input type="number" id="number_bathrooms" name="number_bathrooms" required>
+
+                <label for="description">Descripción:</label>
+                <textarea id="description" name="description" rows="3" required></textarea>
+
+                <label for="garage">¿Tiene Garage?</label>
+                <select id="garage" name="garage" required>
+                    <option value="Sí">Sí</option>
+                    <option value="No">No</option>
+                </select>
+
+                <label for="pool">¿Tiene Piscina?</label>
+                <select id="pool" name="pool" required>
+                    <option value="Sí">Sí</option>
+                    <option value="No">No</option>
+                </select>
+
+                <h3>Dirección</h3>
+                <label for="street">Calle:</label>
+                <input type="text" id="street" name="street" required>
+
+                <label for="province">Provincia:</label>
+                <input type="text" id="province" name="province" required>
+
+                <label for="canton">Cantón:</label>
+                <input type="text" id="canton" name="canton" required>
+
+                <label for="others_signs">Otros Señales:</label>
+                <input type="text" id="others_signs" name="others_signs">
+
+                <h3>Imágenes</h3>
+                <label for="image_url">URL de Imagen (puedes agregar varias):</label>
+                <input type="text" id="image_url" name="image_url" placeholder="https://ejemplo.com/imagen.jpg">
+
+                <h3>Agente</h3>
+                <label for="agent_id">Selecciona un Agente:</label>
+                <select id="agent_id" name="agent_id" required>
+                    {% for agent in agents %}
+                    <option value="{{ agent['_id'] }}">{{ agent['name'] }}</option>
+                    {% endfor %}
+                </select>
+
+                <button type="submit">Agregar Propiedad</button>
             </form>
-        </div>
+        </main>
     </body>
     </html>
     """
-    return render_template_string(html)
+    return render_template_string(html, agents=agents)
 
 @app.route('/edit_property/<property_id>', methods=['GET', 'POST'])
 def edit_property(property_id):
@@ -324,13 +439,21 @@ def edit_property(property_id):
 
     if request.method == 'POST':
         try:
+            # Obtener las imágenes actuales y nuevas imágenes
+            images = request.form.getlist('existing_images')
+            new_image_url = request.form.get('new_image')
+
+            # Agregar la nueva imagen si se proporcionó una URL
+            if new_image_url:
+                images.append(new_image_url)
+
             updated_property = {
                 'name': request.form.get('name'),
                 'price': float(request.form.get('price')),
                 'transaction_type': request.form.get('transaction_type'),
                 'antiquity': int(request.form.get('antiquity')),
                 'owner': request.form.get('owner'),
-                'images': []  # Update image URLs if needed
+                'images': images
             }
 
             property_collection.update_one({'_id': ObjectId(property_id)}, {'$set': updated_property})
@@ -383,6 +506,7 @@ def edit_property(property_id):
                 }
                 input[type="text"],
                 input[type="number"],
+                input[type="file"],
                 input[type="submit"] {
                     padding: 0.5rem;
                     border: 1px solid #ddd;
@@ -398,6 +522,26 @@ def edit_property(property_id):
                 }
                 input[type="submit"]:hover {
                     background-color: #0056b3;
+                }
+                .property-images {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 10px;
+                }
+                .property-images img {
+                    width: 100px;
+                    height: 75px;
+                    object-fit: cover;
+                    border-radius: 8px;
+                }
+                .property-images .remove-image {
+                    background: #ff0000;
+                    color: #fff;
+                    border: none;
+                    padding: 0.3rem 0.5rem;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    margin-left: 10px;
                 }
                 footer {
                     background-color: #333;
@@ -417,7 +561,7 @@ def edit_property(property_id):
                 </div>
             </header>
             <div class="container">
-                <form action="{{ url_for('edit_property', property_id=property_id) }}" method="POST">
+                <form action="{{ url_for('edit_property', property_id=property_id) }}" method="POST" enctype="multipart/form-data">
                     <label for="name">Nombre:</label>
                     <input type="text" id="name" name="name" value="{{ property['name'] }}" required>
                     
@@ -432,16 +576,41 @@ def edit_property(property_id):
                     
                     <label for="owner">Propietario:</label>
                     <input type="text" id="owner" name="owner" value="{{ property['owner'] }}" required>
-                    
+
+                    <label>Imágenes actuales:</label>
+                    <div class="property-images">
+                        {% for image in property['images'] %}
+                        <div>
+                            <img src="{{ image }}" alt="Imagen de la propiedad">
+                            <button type="button" class="remove-image" onclick="removeImage('{{ image }}')">Eliminar</button>
+                            <input type="hidden" name="existing_images" value="{{ image }}">
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <label for="new_image">Nueva Imagen (URL):</label>
+                    <input type="text" id="new_image" name="new_image">
+
                     <input type="submit" value="Guardar Cambios">
                 </form>
             </div>
+            <script>
+                function removeImage(imageUrl) {
+                    const inputs = document.querySelectorAll(`input[value='${imageUrl}']`);
+                    inputs.forEach(input => input.remove());
+                    const images = document.querySelectorAll(`img[src='${imageUrl}']`);
+                    images.forEach(image => image.remove());
+                    const buttons = document.querySelectorAll(`button[onclick="removeImage('${imageUrl}')"]`);
+                    buttons.forEach(button => button.remove());
+                }
+            </script>
         </body>
         </html>
         """
         return render_template_string(html, property=property, property_id=property_id)
     else:
         return "Propiedad no encontrada", 404
+
 
 @app.route('/delete_property/<property_id>')
 def delete_property(property_id):

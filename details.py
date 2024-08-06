@@ -1,4 +1,4 @@
-from flask import Flask, render_template_string, abort, redirect, url_for
+from flask import Flask, render_template_string, abort, redirect, url_for, request
 from pymongo import MongoClient
 from bson import ObjectId
 
@@ -68,6 +68,8 @@ def details(property_id):
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>Detalles de la Propiedad</title>
+            <!-- Bootstrap CSS -->
+            <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
             <style>
                 body {
                     font-family: Arial, sans-serif;
@@ -93,13 +95,10 @@ def details(property_id):
                     border-radius: 8px;
                     box-shadow: 0 0 10px rgba(0,0,0,0.1);
                     display: flex;
-                    flex-wrap: wrap;
+                    gap: 20px;
                 }
                 .property-images {
                     flex: 1;
-                    display: flex;
-                    flex-direction: column;
-                    gap: 10px;
                 }
                 .property-images img {
                     width: 100%;
@@ -109,7 +108,6 @@ def details(property_id):
                 }
                 .property-info {
                     flex: 1;
-                    padding: 0 1rem;
                 }
                 .property-info h2 {
                     margin-top: 0;
@@ -144,6 +142,10 @@ def details(property_id):
                 .contact-button:hover {
                     background-color: #0056b3;
                 }
+                .carousel-control-prev-icon,
+                .carousel-control-next-icon {
+                    background-color: black;
+                }
             </style>
         </head>
         <body>
@@ -154,10 +156,22 @@ def details(property_id):
             </header>
             <div class="container">
                 <div class="property-details">
-                    <div class="property-images">
-                        {% for image in property.images %}
-                        <img src="{{ image }}" alt="Imagen de la propiedad">
-                        {% endfor %}
+                    <div id="propertyCarousel" class="carousel slide property-images" data-ride="carousel">
+                        <div class="carousel-inner">
+                            {% for image in property.images %}
+                            <div class="carousel-item {% if loop.first %}active{% endif %}">
+                                <img src="{{ image }}" class="d-block w-100" alt="Imagen de la propiedad">
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <a class="carousel-control-prev" href="#propertyCarousel" role="button" data-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="sr-only">Previous</span>
+                        </a>
+                        <a class="carousel-control-next" href="#propertyCarousel" role="button" data-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="sr-only">Next</span>
+                        </a>
                     </div>
                     <div class="property-info">
                         <h2>{{ property.name }}</h2>
@@ -186,6 +200,11 @@ def details(property_id):
                     </div>
                 </div>
             </div>
+
+            <!-- Bootstrap JS and dependencies -->
+            <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+            <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
         </body>
         </html>
         """
