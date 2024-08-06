@@ -42,129 +42,127 @@ def index():
         db_connection.close()
 
         html = """
-        <!DOCTYPE html>
-        <html lang="es">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Bienes Raíces</title>
-            <style>
-                body {
-                    font-family: Arial, sans-serif;
-                    margin: 0;
-                    padding: 0;
-                    background-color: #f4f4f4;
-                }
-                header {
-                    background-color: #007BFF;
-                    color: #fff;
-                    padding: 1rem 0;
-                    text-align: center;
-                    position: relative;
-                }
-                .container {
-                    width: 80%;
-                    margin: 0 auto;
-                    overflow: hidden;
-                }
-                .login-button {
-                    position: absolute;
-                    top: 50%;
-                    right: 1rem;
-                    transform: translateY(-50%);
-                    background-color: #fff;
-                    color: #007BFF;
-                    border: none;
-                    padding: 0.5rem 1rem;
-                    border-radius: 5px;
-                    cursor: pointer;
-                }
-                .login-button:hover {
-                    background-color: #f0f0f0;
-                }
-                .add-property-button {
-                    position: absolute;
-                    top: 50%;
-                    right: 6rem;
-                    transform: translateY(-50%);
-                    background-color: #007BFF;
-                    color: #fff;
-                    border: none;
-                    padding: 0.5rem 1rem;
-                    border-radius: 5px;
-                    cursor: pointer;
-                    text-decoration: none;
-                }
-                .add-property-button:hover {
-                    background-color: #0056b3;
-                }
-                .property {
-                    background: #fff;
-                    margin: 1rem 0;
-                    padding: 1rem;
-                    border-radius: 8px;
-                    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-                    display: flex;
-                    flex-direction: column;
-                }
-                .property-info {
-                    display: flex;
-                    flex-direction: column;
-                }
-                .property-images {
-                    display: flex;
-                    flex-wrap: wrap;
-                    gap: 10px;
-                }
-                .property-images img {
-                    width: 100px;
-                    height: 75px;
-                    object-fit: cover;
-                    border-radius: 8px;
-                }
-                .property-info h2 {
-                    margin-top: 0;
-                }
-                .property-info a {
-                    text-decoration: none;
-                    color: #007BFF;
-                }
-                .buttons {
-                    margin-top: 1rem;
-                }
-                .buttons button {
-                    background-color: #007BFF;
-                    color: #fff;
-                    border: none;
-                    padding: 0.5rem 1rem;
-                    border-radius: 5px;
-                    cursor: pointer;
-                    margin-right: 0.5rem;
-                }
-                .buttons button:hover {
-                    background-color: #0056b3;
-                }
-                footer {
-                    background-color: #333;
-                    color: #fff;
-                    text-align: center;
-                    padding: 1rem 0;
-                    position: fixed;
-                    bottom: 0;
-                    width: 100%;
-                }
-            </style>
-        </head>
-        <body>
-            <header>
-                <div class="container">
-                    <h1>Bienes Raíces</h1>
-                    <a href="/login">
-                        <button class="login-button">Iniciar Sesión</button>
-                    </a>
-                    <a href="/add_property" class="add-property-button">Agregar Propiedad</a>
-                </div>
-            </header>
+       <html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bienes Raíces</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        header {
+            background-color: #007BFF;
+            color: #fff;
+            padding: 1rem 0;
+            text-align: center;
+            position: relative;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+        .login-button {
+            position: absolute;
+            top: 50%;
+            right: 1rem;
+            transform: translateY(-50%);
+            background-color: #fff;
+            color: #007BFF;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .login-button:hover {
+            background-color: #f0f0f0;
+        }
+        .add-property-button {
+            display: inline-block;
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            margin-top: 1rem;
+        }
+        .add-property-button:hover {
+            background-color: #0056b3;
+        }
+        .property {
+            background: #fff;
+            margin: 1rem 0;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+        }
+        .property-info {
+            display: flex;
+            flex-direction: column;
+        }
+        .property-images {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .property-images img {
+            width: 100px;
+            height: 75px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        .property-info h2 {
+            margin-top: 0;
+        }
+        .property-info a {
+            text-decoration: none;
+            color: #007BFF;
+        }
+        .buttons {
+            margin-top: 1rem;
+        }
+        .buttons button {
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 0.5rem;
+        }
+        .buttons button:hover {
+            background-color: #0056b3;
+        }
+        footer {
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 1rem 0;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Bienes Raíces</h1>
+            <a href="/add_property" class="add-property-button">Agregar Propiedad</a>
+            <a href="/add_agent" class="add-agent-button">Agregar Agente</a>
+            <a href="/login">
+                <button class="login-button">Iniciar Sesión</button>
+            </a>
+        </div>
+    </header>
             <div class="container">
                 <h2>Propiedades Destacadas</h2>
                 <div class="properties">
@@ -610,6 +608,7 @@ def edit_property(property_id):
         return "Propiedad no encontrada", 404
 
 
+
 @app.route('/delete_property/<property_id>')
 def delete_property(property_id):
     try:
@@ -622,6 +621,9 @@ def delete_property(property_id):
 
     except Exception as e:
         return f"Error en la operación de MongoDB: {e}"
+    
+    
+  
 
 if __name__ == '__main__':
     app.run(debug=True)
