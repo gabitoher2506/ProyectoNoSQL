@@ -51,7 +51,7 @@ def register():
 
         # Assign role to the new user
         roles_collection.insert_one({
-            'name': 'Admin',
+            'name': 'Cliente',
             'id_user': ObjectId(user_id)
         })
 

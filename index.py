@@ -1,6 +1,7 @@
 from flask import Flask, render_template_string, redirect, url_for, request
 from pymongo import MongoClient
 from bson import ObjectId
+from datetime import datetime 
 
 app = Flask(__name__)
 
@@ -95,6 +96,23 @@ def index():
         .add-property-button:hover {
             background-color: #0056b3;
         }
+        
+        .add-agent-button"{
+            display: inline-block;
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            margin-top: 1rem;
+        }
+        
+        .add-agent-button:hover {
+            background-color: #0056b3;
+        }
+        
         .property {
             background: #fff;
             margin: 1rem 0;
@@ -157,7 +175,7 @@ def index():
         <div class="container">
             <h1>Bienes Raíces</h1>
             <a href="/add_property" class="add-property-button">Agregar Propiedad</a>
-            <a href="/add_agent" class="add-agent-button">Agregar Agente</a>
+            <a href="/add_agent" class="add-property-button">Agregar Agente</a>
             <a href="/login">
                 <button class="login-button">Iniciar Sesión</button>
             </a>
@@ -196,6 +214,274 @@ def index():
 
     except Exception as e:
         return f"Error en la operación de MongoDB: {e}"
+    
+@app.route('/add_agent', methods=['GET', 'POST'])
+def add_agent():
+    if request.method == 'POST':
+        db_connection = MongoDBConnection()
+        users_collection = db_connection.get_collection('Users')
+        roles_collection = db_connection.get_collection('Rol')
+        agents_collection = db_connection.get_collection('Agent')
+        
+        # Crear nuevo usuario
+        new_user = {
+            "password": request.form['password'],
+            "birth_date": request.form['birth_date'],
+            "first_sur_name": request.form['first_sur_name'],
+            "second_sur_name": request.form['second_sur_name'],
+            "name": request.form['name'],
+            "identification": request.form['identification'],
+            "email": request.form['email'],
+            "phone": request.form['phone'],
+            "image": request.form['image']
+        }
+        
+        # Insertar el nuevo usuario en la colección Users
+        user_id = users_collection.insert_one(new_user).inserted_id
+        
+        # Asignar rol de "Agente" al nuevo usuario
+        new_role = {
+            "name": "Agente",
+            "id_user": str(user_id)
+        }
+        
+        # Insertar el rol en la colección Rol
+        roles_collection.insert_one(new_role)
+
+        # Crear un nuevo documento en la colección Agent
+        new_agent = {
+            "id_user": str(user_id),
+            "name": request.form['name'],
+            "salary": request.form['salary'],  # Suponiendo que se captura el salario en el formulario
+            "experience": request.form['experience'],  # Suponiendo que se captura la experiencia en el formulario
+            "hire_date": datetime.now()  # Fecha de contratación actual
+        }
+        
+        # Insertar el nuevo agente en la colección Agent
+        agents_collection.insert_one(new_agent)
+
+        db_connection.close()
+        return redirect(url_for('view_agents'))
+
+    return render_template_string('''
+        <html lang="es">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+            <title>Agregar Agente</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    background-color: #f4f4f4;
+                    padding: 20px;
+                }
+                .form-container {
+                    background-color: #fff;
+                    padding: 20px;
+                    border-radius: 8px;
+                    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+                }
+                .form-group {
+                    margin-bottom: 15px;
+                }
+                .form-group label {
+                    display: block;
+                    margin-bottom: 5px;
+                }
+                .form-group input {
+                    width: 100%;
+                    padding: 8px;
+                    box-sizing: border-box;
+                    border: 1px solid #ccc;
+                    border-radius: 4px;
+                }
+                .form-group button {
+                    background-color: #007BFF;
+                    color: #fff;
+                    border: none;
+                    padding: 10px 15px;
+                    border-radius: 4px;
+                    cursor: pointer;
+                }
+                .form-group button:hover {
+                    background-color: #0056b3;
+                }
+                
+                 
+                .back-button {
+                    display: inline-block;
+                    margin-top: 20px;
+                    padding: 10px 15px;
+                    background-color: #6c757d;
+                    color: #fff;
+                    border: none;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    text-decoration: none;
+                    font-size: 16px;
+                }
+                .back-button:hover {
+                    background-color: #5a6268;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="form-container">
+                <h2>Agregar Nuevo Agente</h2>
+                <a href="{{ url_for('index') }}" class="back-button">Menú</a>
+                <form method="post">
+                    <div class="form-group">
+                        <label for="name">Nombre:</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="first_sur_name">Primer Apellido:</label>
+                        <input type="text" id="first_sur_name" name="first_sur_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="second_sur_name">Segundo Apellido:</label>
+                        <input type="text" id="second_sur_name" name="second_sur_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="identification">Identificación:</label>
+                        <input type="text" id="identification" name="identification" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="birth_date">Fecha de Nacimiento:</label>
+                        <input type="date" id="birth_date" name="birth_date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Correo Electrónico:</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Teléfono:</label>
+                        <input type="text" id="phone" name="phone" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Contraseña:</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="image">URL de la Imagen:</label>
+                        <input type="text" id="image" name="image">
+                    </div>
+                    <div class="form-group">
+                        <label for="salary">Salario:</label>
+                        <input type="text" id="salary" name="salary" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="experience">Experiencia:</label>
+                        <input type="text" id="experience" name="experience" required>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit">Agregar Agente</button>
+                    </div>
+                </form>
+            </div>
+            
+        </body>
+        </html>
+    ''')
+
+@app.route('/view_agents')
+def view_agents():
+    db_connection = MongoDBConnection()
+    agents_collection = db_connection.get_collection('Agent')
+    users_collection = db_connection.get_collection('Users')
+
+    agents = list(agents_collection.find())  # Obtener todos los agentes de la colección
+
+    # Combinar información de la colección de agentes con la colección de usuarios para obtener la imagen
+    for agent in agents:
+        user = users_collection.find_one({"_id": ObjectId(agent['id_user'])})
+        if user:
+            agent['image'] = user.get('image', '')
+    
+    db_connection.close()
+
+    return render_template_string('''
+        <html lang="es">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Lista de Agentes</title>
+            
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    background-color: #f4f4f4;
+                    padding: 20px;
+                }
+                .agents-container {
+                    background-color: #fff;
+                    padding: 20px;
+                    border-radius: 8px;
+                    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+                }
+                .agent {
+                    margin-bottom: 15px;
+                    padding: 10px;
+                    border: 1px solid #ccc;
+                    border-radius: 4px;
+                    background-color: #fafafa;
+                    display: flex;
+                    align-items: center;
+                }
+                .agent img {
+                    width: 100px;
+                    height: 100px;
+                    border-radius: 50%;
+                    margin-right: 20px;
+                }
+                .agent h3 {
+                    margin: 0;
+                }
+                .agent p {
+                    margin: 5px 0;
+                }
+                
+                 
+                .back-button {
+                    display: inline-block;
+                    margin-top: 20px;
+                    padding: 10px 15px;
+                    background-color: #6c757d;
+                    color: #fff;
+                    border: none;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    text-decoration: none;
+                    font-size: 16px;
+                }
+                .back-button:hover {
+                    background-color: #5a6268;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="agents-container">
+                <h2>Lista de Agentes Registrados</h2>
+                <a href="{{ url_for('index') }}" class="back-button">Menú</a>
+                {% for agent in agents %}
+                <div class="agent">
+                    <img src="{{ agent.image }}" alt="Imagen de {{ agent.name }}">
+                    <div>
+                        <h3>{{ agent.name }}</h3>
+                        <p><strong>Salario:</strong> {{ agent.salary }}</p>
+                        <p><strong>Experiencia:</strong> {{ agent.experience }}</p>
+                        <p><strong>Fecha de Contratación:</strong> {{ agent.hire_date }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </body>
+        </html>
+    ''', agents=agents)
+
+if __name__ == '__main__':
+    app.run(debug=True)
 
 @app.route('/add_property', methods=['GET', 'POST'])
 def add_property():
