@@ -28,13 +28,17 @@ def contacto(property_id):
             db_connection = MongoDBConnection()
             contact_collection = db_connection.get_collection('Contact')
 
+            # Obtener fechas disponibles del formulario
+            available_dates = request.form.getlist('available_dates')
+
             contact_data = {
                 'id_property': ObjectId(property_id),
                 'date_contact': datetime.now(),
                 'name': request.form['name'],
                 'phone': request.form['phone'],
                 'email': request.form['email'],
-                'message': request.form['message']
+                'message': request.form['message'],
+                'available_dates': available_dates  # Agregar fechas disponibles
             }
 
             contact_collection.insert_one(contact_data)
@@ -100,6 +104,12 @@ def contacto(property_id):
             .contact-form button:hover {
                 background-color: #0056b3;
             }
+            .date-picker {
+                margin: 5px 0;
+            }
+            .date-picker input {
+                margin: 5px 0;
+            }
         </style>
     </head>
     <body>
@@ -116,6 +126,17 @@ def contacto(property_id):
                     <input type="tel" name="phone" placeholder="Teléfono" required>
                     <input type="email" name="email" placeholder="Correo Electrónico" required>
                     <textarea name="message" placeholder="Mensaje" required></textarea>
+
+                    <!-- Campos para fechas disponibles -->
+                    <div class="date-picker">
+                        <label>Fechas Disponibles:</label>
+                        <input type="date" name="available_dates" />
+                        <input type="date" name="available_dates" />
+                        <input type="date" name="available_dates" />
+                        <input type="date" name="available_dates" />
+                        <!-- Agregar más campos según sea necesario -->
+                    </div>
+
                     <button type="submit">Enviar</button>
                 </form>
             </div>
@@ -124,3 +145,4 @@ def contacto(property_id):
     </html>
     """
     return render_template_string(html)
+

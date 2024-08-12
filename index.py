@@ -177,6 +177,9 @@ def index():
             <a href="/add_property" class="add-property-button">Agregar Propiedad</a>
             <a href="/add_agent" class="add-property-button">Agregar Agente</a>
             <a href="/view_agents" class="add-property-button">Agente</a>
+            <a href="/view_interested" class="add-property-button">Interesados</a>
+          
+
             <a href="/login">
                 <button class="login-button">Iniciar Sesión</button>
             </a>
@@ -215,6 +218,8 @@ def index():
 
     except Exception as e:
         return f"Error en la operación de MongoDB: {e}"
+    
+    
     
 @app.route('/add_agent', methods=['GET', 'POST'])
 def add_agent():
@@ -385,6 +390,7 @@ def add_agent():
         </body>
         </html>
     ''')
+
 @app.route('/view_agents')
 def view_agents():
     db_connection = MongoDBConnection()
@@ -450,11 +456,10 @@ def view_agents():
                     margin: 5px 0;
                 }
                 
-                .edit-button {
+                .edit-button, .delete-button {
                     display: inline-block;
                     margin-left: 10px;
                     padding: 5px 10px;
-                    background-color: #007bff;
                     color: #fff;
                     border: none;
                     border-radius: 4px;
@@ -462,8 +467,17 @@ def view_agents():
                     text-decoration: none;
                     font-size: 14px;
                 }
+                .edit-button {
+                    background-color: #007bff;
+                }
                 .edit-button:hover {
                     background-color: #0056b3;
+                }
+                .delete-button {
+                    background-color: #dc3545;
+                }
+                .delete-button:hover {
+                    background-color: #c82333;
                 }
                 .back-button {
                     display: inline-block;
@@ -495,13 +509,307 @@ def view_agents():
                         <p><strong>Experiencia:</strong> {{ agent.experience }}</p>
                         <p><strong>Fecha de Contratación:</strong> {{ agent.hire_date }}</p>
                     </div>
-                    <a href="{{ url_for('edit_agent', agent_id=agent._id) }}" class="edit-button">Editar</a>
+                    <div>
+                        <a href="{{ url_for('edit_agent', agent_id=agent._id) }}" class="edit-button">Editar</a>
+                        <a href="{{ url_for('delete_agent', agent_id=agent._id) }}" class="delete-button" onclick="return confirm('¿Estás seguro de que quieres eliminar este agente?')">Eliminar</a>
+                    </div>
                 </div>
                 {% endfor %}
             </div>
         </body>
         </html>
     ''', agents=agents)
+@app.route('/view_interested')
+def view_interested():
+    db_connection = MongoDBConnection()
+    contact_collection = db_connection.get_collection('Contact')
+
+    contacts = list(contact_collection.find())  # Obtener todos los contactos de la colección
+
+    # Convertir la fecha de contacto a cadena en formato 'dd/mm/yyyy'
+    for contact in contacts:
+        if isinstance(contact.get('date_contact'), str):
+            try:
+                contact['date_contact'] = datetime.fromisoformat(contact['date_contact']).strftime('%d/%m/%Y')
+            except ValueError:
+                contact['date_contact'] = 'No disponible'
+        else:
+            contact['date_contact'] = 'No disponible'
+        # Convertir _id a cadena para usar en la plantilla
+        contact['id_str'] = str(contact['_id'])
+
+    db_connection.close()
+
+    return render_template_string('''
+        <html lang="es">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Lista de Interesados</title>
+            <style>
+                body {
+                    font-family: 'Roboto', sans-serif;
+                    background-color: #f0f2f5;
+                    margin: 0;
+                    padding: 0;
+                }
+                .container {
+                    max-width: 900px;
+                    margin: 50px auto;
+                    padding: 20px;
+                    background-color: #ffffff;
+                    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+                    border-radius: 10px;
+                }
+                .container h2 {
+                    margin-bottom: 30px;
+                    font-size: 28px;
+                    color: #333;
+                    text-align: center;
+                    border-bottom: 2px solid #007bff;
+                    padding-bottom: 10px;
+                }
+                .contact-card {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: flex-start;
+                    background-color: #f7f9fc;
+                    margin-bottom: 20px;
+                    padding: 20px;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                    transition: transform 0.2s ease;
+                }
+                .contact-card:hover {
+                    transform: translateY(-5px);
+                }
+                .contact-details {
+                    max-width: 75%;
+                }
+                .contact-details h3 {
+                    margin-top: 0;
+                    font-size: 22px;
+                    color: #007bff;
+                }
+                .contact-details p {
+                    margin: 5px 0;
+                    font-size: 16px;
+                    color: #555;
+                }
+                .contact-details p strong {
+                    color: #333;
+                }
+                .back-button {
+                    display: inline-block;
+                    margin-top: 20px;
+                    padding: 10px 20px;
+                    background-color: #007bff;
+                    color: #fff;
+                    border: none;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    text-decoration: none;
+                    font-size: 16px;
+                    transition: background-color 0.3s ease;
+                }
+                .back-button:hover {
+                    background-color: #0056b3;
+                }
+                .contact-icon {
+                    font-size: 24px;
+                    color: #007bff;
+                    margin-right: 15px;
+                }
+                .contact-details p .contact-icon {
+                    font-size: 18px;
+                }
+                .schedule-button {
+                    display: inline-block;
+                    margin-top: 10px;
+                    padding: 10px 20px;
+                    background-color: #28a745;
+                    color: #fff;
+                    border: none;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    text-decoration: none;
+                    font-size: 16px;
+                    transition: background-color 0.3s ease;
+                }
+                .schedule-button:hover {
+                    background-color: #218838;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h2>Lista de Interesados</h2>
+                <a href="{{ url_for('index') }}" class="back-button">Menú</a>
+                {% for contact in contacts %}
+                <div class="contact-card">
+                    <div class="contact-details">
+                        <h3>{{ contact.name }}</h3>
+                        <p><strong><span class="contact-icon">📞</span>Teléfono:</strong> {{ contact.phone }}</p>
+                        <p><strong><span class="contact-icon">📧</span>Email:</strong> {{ contact.email }}</p>
+                        <p><strong><span class="contact-icon">💬</span>Mensaje:</strong> {{ contact.message }}</p>
+                        <p><strong><span class="contact-icon">📅</span>Fecha de Contacto:</strong> {{ contact.date_contact }}</p>
+                        <p><strong><span class="contact-icon">📅</span>Fechas Disponibles:</strong>
+                        {% if contact.available_dates %}
+                            <ul>
+                                {% for date in contact.available_dates %}
+                                    <li>{{ date }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            No disponible
+                        {% endif %}
+                        </p>
+                        <a href="{{ url_for('schedule_appointment', contact_id=contact.id_str) }}" class="schedule-button">Programar Cita</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </body>
+        </html>
+    ''', contacts=contacts)
+
+@app.route('/schedule/<contact_id>', methods=['GET', 'POST'])
+def schedule_appointment(contact_id):
+    db_connection = MongoDBConnection()
+    contact_collection = db_connection.get_collection('Contact')
+    appointment_collection = db_connection.get_collection('Appointments')
+
+    contact = contact_collection.find_one({'_id': ObjectId(contact_id)})
+
+    if request.method == 'POST':
+        try:
+            selected_date = request.form['selected_date']
+            agent_id = request.form['agent_id']  # Aquí deberías obtener el ID del agente que está programando la cita
+
+            appointment_data = {
+                'id_contact': ObjectId(contact_id),
+                'date_confirmed': datetime.now(),
+                'agent_id': ObjectId(agent_id),
+                'selected_date': datetime.strptime(selected_date, '%Y-%m-%d'),
+                'status': 'confirmada'
+            }
+
+            appointment_collection.insert_one(appointment_data)
+            db_connection.close()
+
+            return redirect(url_for('view_interested'))
+        except Exception as e:
+            return f"Error en la operación de MongoDB: {e}"
+    
+    available_dates = contact.get('available_dates', [])
+
+    db_connection.close()
+
+    return render_template_string('''
+        <html lang="es">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Programar Cita</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    margin: 0;
+                    padding: 0;
+                    background-color: #f4f4f4;
+                }
+                header {
+                    background-color: #007BFF;
+                    color: #fff;
+                    padding: 1rem 0;
+                    text-align: center;
+                }
+                .container {
+                    width: 80%;
+                    margin: 0 auto;
+                    overflow: hidden;
+                }
+                .schedule-form {
+                    background: #fff;
+                    margin: 1rem 0;
+                    padding: 1rem;
+                    border-radius: 8px;
+                    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+                }
+                .schedule-form h2 {
+                    margin-top: 0;
+                }
+                .schedule-form input, .schedule-form select {
+                    width: 100%;
+                    padding: 10px;
+                    margin: 5px 0 10px 0;
+                    border: 1px solid #ccc;
+                    border-radius: 5px;
+                }
+                .schedule-form button {
+                    display: block;
+                    width: 100%;
+                    padding: 1rem;
+                    font-size: 1rem;
+                    color: #fff;
+                    background-color: #007BFF;
+                    border: none;
+                    border-radius: 5px;
+                    cursor: pointer;
+                }
+                .schedule-form button:hover {
+                    background-color: #0056b3;
+                }
+            </style>
+        </head>
+        <body>
+            <header>
+                <div class="container">
+                    <h1>Programar Cita</h1>
+                </div>
+            </header>
+            <div class="container">
+                <div class="schedule-form">
+                    <h2>Seleccione una Fecha</h2>
+                    <form method="POST">
+                        <label for="selected_date">Fecha:</label>
+                        <select name="selected_date" id="selected_date" required>
+                            {% for date in available_dates %}
+                                <option value="{{ date }}">{{ date }}</option>
+                            {% endfor %}
+                        </select>
+                        <input type="hidden" name="agent_id" value="AGENT_ID_HERE"> <!-- Aquí deberías establecer el ID del agente -->
+                        <button type="submit">Confirmar Cita</button>
+                    </form>
+                </div>
+            </div>
+        </body>
+        </html>
+    ''', contact=contact, available_dates=available_dates)
+
+
+@app.route('/delete_agent/<agent_id>')
+def delete_agent(agent_id):
+    db_connection = MongoDBConnection()
+    agents_collection = db_connection.get_collection('Agent')
+    roles_collection = db_connection.get_collection('Rol')
+    users_collection = db_connection.get_collection('Users')
+
+    agent = agents_collection.find_one({"_id": ObjectId(agent_id)})
+    
+    if agent:
+        # Eliminar el agente
+        agents_collection.delete_one({"_id": ObjectId(agent_id)})
+
+        # Eliminar el rol relacionado
+        roles_collection.delete_many({"id_user": agent['id_user']})
+
+        # Eliminar el usuario relacionado
+        users_collection.delete_one({"_id": ObjectId(agent['id_user'])})
+
+    db_connection.close()
+
+    return redirect(url_for('view_agents'))
 
 @app.route('/edit_agent/<agent_id>', methods=['GET', 'POST'])
 def edit_agent(agent_id):
@@ -514,7 +822,7 @@ def edit_agent(agent_id):
         updated_agent_data = {
             'salary': request.form['salary'],
             'experience': request.form['experience'],
-            'hire_date': request.form['hire_date'],  # Asume que el formato ya es correcto
+            'hire_date': request.form['hire_date'],  # Se guarda como str
             'name': request.form['name']
         }
         agents_collection.update_one({"_id": ObjectId(agent_id)}, {"$set": updated_agent_data})
@@ -523,11 +831,9 @@ def edit_agent(agent_id):
         user_id = request.form['user_id']
         updated_user_data = {
             'password': request.form['password'],
-            'birth_date': request.form['birth_date'],  # Asume que el formato ya es correcto
-            'first_sur_name': request.form['first_sur_name'],
-            'second_sur_name': request.form['second_sur_name'],
+            'birth_date': request.form['birth_date'],  # Se guarda como str
             'name': request.form['user_name'],
-            'identification': request.form['identification'],
+            'identification': request.form.get('identification', ''),  # Se usa .get para evitar KeyError
             'email': request.form['email'],
             'phone': request.form['phone'],
             'image': request.form['image']
@@ -549,110 +855,110 @@ def edit_agent(agent_id):
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>Editar Agente</title>
             <style>
-               body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-    margin: 0;
-    padding: 0;
-}
+                body {
+                    font-family: Arial, sans-serif;
+                    background-color: #f4f4f4;
+                    margin: 0;
+                    padding: 0;
+                }
 
-.container {
-    max-width: 800px;
-    margin: 20px auto;
-    padding: 20px;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
+                .container {
+                    max-width: 800px;
+                    margin: 20px auto;
+                    padding: 20px;
+                    background: #fff;
+                    border-radius: 8px;
+                    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                }
 
-h2 {
-    color: #333;
-    margin-bottom: 20px;
-    text-align: center;
-}
+                h2 {
+                    color: #333;
+                    margin-bottom: 20px;
+                    text-align: center;
+                }
 
-form {
-    display: flex;
-    flex-direction: column;
-}
+                form {
+                    display: flex;
+                    flex-direction: column;
+                }
 
-.form-group {
-    margin-bottom: 15px;
-}
+                .form-group {
+                    margin-bottom: 15px;
+                }
 
-.form-group label {
-    display: block;
-    font-weight: bold;
-    margin-bottom: 5px;
-    color: #555;
-}
+                .form-group label {
+                    display: block;
+                    font-weight: bold;
+                    margin-bottom: 5px;
+                    color: #555;
+                }
 
-.form-group input[type="text"],
-.form-group input[type="email"],
-.form-group input[type="password"],
-.form-group input[type="date"] {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    box-sizing: border-box;
-}
+                .form-group input[type="text"],
+                .form-group input[type="email"],
+                .form-group input[type="password"],
+                .form-group input[type="date"] {
+                    width: 100%;
+                    padding: 10px;
+                    border: 1px solid #ddd;
+                    border-radius: 4px;
+                    box-sizing: border-box;
+                }
 
-.form-group input[type="submit"] {
-    background-color: #28a745;
-    color: #fff;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s;
-}
+                .form-group input[type="submit"] {
+                    background-color: #28a745;
+                    color: #fff;
+                    border: none;
+                    padding: 10px 15px;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    font-size: 16px;
+                    transition: background-color 0.3s;
+                }
 
-.form-group input[type="submit"]:hover {
-    background-color: #218838;
-}
+                .form-group input[type="submit"]:hover {
+                    background-color: #218838;
+                }
 
-input[type="hidden"] {
-    display: none;
-}
+                input[type="hidden"] {
+                    display: none;
+                }
 
-a {
-    text-decoration: none;
-    color: #007bff;
-}
+                a {
+                    text-decoration: none;
+                    color: #007bff;
+                }
 
-a:hover {
-    text-decoration: underline;
-}
-/* Estilos para el botón de actualización */
-.form-group input[type="submit"] {
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 18px;
-    font-weight: bold;
-    text-transform: uppercase;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    transition: all 0.3s ease;
-    margin-top: 20px;
-}
+                a:hover {
+                    text-decoration: underline;
+                }
 
-.form-group input[type="submit"]:hover {
-    background-color: #0056b3;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-    transform: translateY(-2px);
-}
+                /* Estilos para el botón de actualización */
+                .form-group input[type="submit"] {
+                    background-color: #007bff;
+                    color: #fff;
+                    border: none;
+                    padding: 12px 24px;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    font-size: 18px;
+                    font-weight: bold;
+                    text-transform: uppercase;
+                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                    transition: all 0.3s ease;
+                    margin-top: 20px;
+                }
 
-.form-group input[type="submit"]:active {
-    background-color: #004085;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    transform: translateY(0);
-}
+                .form-group input[type="submit"]:hover {
+                    background-color: #0056b3;
+                    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+                    transform: translateY(-2px);
+                }
 
+                .form-group input[type="submit"]:active {
+                    background-color: #004085;
+                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                    transform: translateY(0);
+                }
             </style>
         </head>
         <body>
@@ -681,6 +987,10 @@ a:hover {
                         <input type="text" id="user_name" name="user_name" value="{{ user.name }}" required>
                     </div>
                     <div class="form-group">
+                        <label for="identification">Identificación:</label>
+                        <input type="text" id="identification" name="identification" value="{{ user.identification }}" required>
+                    </div>
+                    <div class="form-group">
                         <label for="email">Correo Electrónico:</label>
                         <input type="email" id="email" name="email" value="{{ user.email }}" required>
                     </div>
@@ -700,16 +1010,15 @@ a:hover {
                         <label for="image">Imagen:</label>
                         <input type="text" id="image" name="image" value="{{ user.image }}" required>
                     </div>
-                   <form action="{{ url_for('edit_agent', agent_id=agent._id) }}" method="post">
-    <!-- Otros campos del formulario -->
-    <div class="form-group">
-        <input type="submit" value="Actualizar">
-    </div>
-</form>
+                    <div class="form-group">
+                        <input type="submit" value="Actualizar">
+                    </div>
+                </form>
             </div>
         </body>
         </html>
     ''', agent=agent, user=user)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
