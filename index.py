@@ -176,6 +176,7 @@ def index():
             <h1>Bienes Raíces</h1>
             <a href="/add_property" class="add-property-button">Agregar Propiedad</a>
             <a href="/add_agent" class="add-property-button">Agregar Agente</a>
+            <a href="/view_agents" class="add-property-button">Agente</a>
             <a href="/login">
                 <button class="login-button">Iniciar Sesión</button>
             </a>
@@ -384,7 +385,6 @@ def add_agent():
         </body>
         </html>
     ''')
-
 @app.route('/view_agents')
 def view_agents():
     db_connection = MongoDBConnection()
@@ -398,7 +398,14 @@ def view_agents():
         user = users_collection.find_one({"_id": ObjectId(agent['id_user'])})
         if user:
             agent['image'] = user.get('image', '')
-    
+
+        # Convertir la fecha de contratación a cadena en formato 'dd/mm/yyyy'
+        if isinstance(agent.get('hire_date'), str):
+            try:
+                agent['hire_date'] = datetime.fromisoformat(agent['hire_date']).strftime('%d/%m/%Y')
+            except ValueError:
+                agent['hire_date'] = 'No disponible'
+
     db_connection.close()
 
     return render_template_string('''
@@ -428,6 +435,7 @@ def view_agents():
                     background-color: #fafafa;
                     display: flex;
                     align-items: center;
+                    justify-content: space-between;
                 }
                 .agent img {
                     width: 100px;
@@ -442,7 +450,21 @@ def view_agents():
                     margin: 5px 0;
                 }
                 
-                 
+                .edit-button {
+                    display: inline-block;
+                    margin-left: 10px;
+                    padding: 5px 10px;
+                    background-color: #007bff;
+                    color: #fff;
+                    border: none;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    text-decoration: none;
+                    font-size: 14px;
+                }
+                .edit-button:hover {
+                    background-color: #0056b3;
+                }
                 .back-button {
                     display: inline-block;
                     margin-top: 20px;
@@ -473,12 +495,221 @@ def view_agents():
                         <p><strong>Experiencia:</strong> {{ agent.experience }}</p>
                         <p><strong>Fecha de Contratación:</strong> {{ agent.hire_date }}</p>
                     </div>
+                    <a href="{{ url_for('edit_agent', agent_id=agent._id) }}" class="edit-button">Editar</a>
                 </div>
                 {% endfor %}
             </div>
         </body>
         </html>
     ''', agents=agents)
+
+@app.route('/edit_agent/<agent_id>', methods=['GET', 'POST'])
+def edit_agent(agent_id):
+    db_connection = MongoDBConnection()
+    agents_collection = db_connection.get_collection('Agent')
+    users_collection = db_connection.get_collection('Users')
+
+    if request.method == 'POST':
+        # Actualizar los datos del agente
+        updated_agent_data = {
+            'salary': request.form['salary'],
+            'experience': request.form['experience'],
+            'hire_date': request.form['hire_date'],  # Asume que el formato ya es correcto
+            'name': request.form['name']
+        }
+        agents_collection.update_one({"_id": ObjectId(agent_id)}, {"$set": updated_agent_data})
+
+        # Actualizar los datos del usuario asociado
+        user_id = request.form['user_id']
+        updated_user_data = {
+            'password': request.form['password'],
+            'birth_date': request.form['birth_date'],  # Asume que el formato ya es correcto
+            'first_sur_name': request.form['first_sur_name'],
+            'second_sur_name': request.form['second_sur_name'],
+            'name': request.form['user_name'],
+            'identification': request.form['identification'],
+            'email': request.form['email'],
+            'phone': request.form['phone'],
+            'image': request.form['image']
+        }
+        users_collection.update_one({"_id": ObjectId(user_id)}, {"$set": updated_user_data})
+
+        db_connection.close()
+        return redirect(url_for('view_agents'))
+
+    # Obtener los detalles del agente y del usuario asociado
+    agent = agents_collection.find_one({"_id": ObjectId(agent_id)})
+    user = users_collection.find_one({"_id": ObjectId(agent['id_user'])})
+    db_connection.close()
+
+    return render_template_string('''
+        <html lang="es">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Editar Agente</title>
+            <style>
+               body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+    color: #333;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #555;
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="password"],
+.form-group input[type="date"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.form-group input[type="submit"] {
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+.form-group input[type="submit"]:hover {
+    background-color: #218838;
+}
+
+input[type="hidden"] {
+    display: none;
+}
+
+a {
+    text-decoration: none;
+    color: #007bff;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+/* Estilos para el botón de actualización */
+.form-group input[type="submit"] {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    text-transform: uppercase;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    margin-top: 20px;
+}
+
+.form-group input[type="submit"]:hover {
+    background-color: #0056b3;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    transform: translateY(-2px);
+}
+
+.form-group input[type="submit"]:active {
+    background-color: #004085;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transform: translateY(0);
+}
+
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h2>Editar Agente</h2>
+                <form action="{{ url_for('edit_agent', agent_id=agent._id) }}" method="post">
+                    <div class="form-group">
+                        <label for="name">Nombre:</label>
+                        <input type="text" id="name" name="name" value="{{ agent.name }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="salary">Salario:</label>
+                        <input type="text" id="salary" name="salary" value="{{ agent.salary }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="experience">Experiencia:</label>
+                        <input type="text" id="experience" name="experience" value="{{ agent.experience }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="hire_date">Fecha de Contratación:</label>
+                        <input type="text" id="hire_date" name="hire_date" value="{{ agent.hire_date }}" required>
+                    </div>
+                    <input type="hidden" name="user_id" value="{{ user._id }}">
+                    <div class="form-group">
+                        <label for="user_name">Nombre de Usuario:</label>
+                        <input type="text" id="user_name" name="user_name" value="{{ user.name }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Correo Electrónico:</label>
+                        <input type="email" id="email" name="email" value="{{ user.email }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Contraseña:</label>
+                        <input type="text" id="password" name="password" value="{{ user.password }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="birth_date">Fecha de Nacimiento:</label>
+                        <input type="text" id="birth_date" name="birth_date" value="{{ user.birth_date }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Teléfono:</label>
+                        <input type="text" id="phone" name="phone" value="{{ user.phone }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="image">Imagen:</label>
+                        <input type="text" id="image" name="image" value="{{ user.image }}" required>
+                    </div>
+                   <form action="{{ url_for('edit_agent', agent_id=agent._id) }}" method="post">
+    <!-- Otros campos del formulario -->
+    <div class="form-group">
+        <input type="submit" value="Actualizar">
+    </div>
+</form>
+            </div>
+        </body>
+        </html>
+    ''', agent=agent, user=user)
 
 if __name__ == '__main__':
     app.run(debug=True)
