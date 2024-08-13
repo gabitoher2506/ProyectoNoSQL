@@ -178,6 +178,7 @@ def index():
             <a href="/add_agent" class="add-property-button">Agregar Agente</a>
             <a href="/view_agents" class="add-property-button">Agente</a>
             <a href="/view_interested" class="add-property-button">Interesados</a>
+            <a href="/confirmed_appointments" class="add-property-button">Citas Confirmadas</a>
           
 
             <a href="/login">
@@ -678,19 +679,38 @@ def schedule_appointment(contact_id):
     db_connection = MongoDBConnection()
     contact_collection = db_connection.get_collection('Contact')
     appointment_collection = db_connection.get_collection('Appointments')
+    property_collection = db_connection.get_collection('Property')
 
     contact = contact_collection.find_one({'_id': ObjectId(contact_id)})
 
     if request.method == 'POST':
         try:
             selected_date = request.form['selected_date']
-            agent_id = request.form['agent_id']  # Aquí deberías obtener el ID del agente que está programando la cita
+
+            # Obtener `id_property` del contacto
+            id_property = contact.get('id_property')
+            if not id_property:
+                return "El contacto no tiene una propiedad asociada."
+
+            # Obtener `id_agent` usando `id_property`
+            property_info = property_collection.find_one({'_id': ObjectId(id_property)})
+            if not property_info:
+                return "No se encontró la propiedad asociada."
+
+            id_agent = property_info.get('id_agent')
+            if not id_agent:
+                return "No se encontró un agente asociado a la propiedad."
 
             appointment_data = {
                 'id_contact': ObjectId(contact_id),
-                'date_confirmed': datetime.now(),
-                'agent_id': ObjectId(agent_id),
+                'id_property': ObjectId(id_property),
+                'date_contact': datetime.now(),
+                'name': contact['name'],
+                'phone': contact['phone'],
+                'email': contact['email'],
+                'available_dates': contact.get('available_dates', []),
                 'selected_date': datetime.strptime(selected_date, '%Y-%m-%d'),
+                'agent_id': ObjectId(id_agent),
                 'status': 'confirmada'
             }
 
@@ -778,7 +798,6 @@ def schedule_appointment(contact_id):
                                 <option value="{{ date }}">{{ date }}</option>
                             {% endfor %}
                         </select>
-                        <input type="hidden" name="agent_id" value="AGENT_ID_HERE"> <!-- Aquí deberías establecer el ID del agente -->
                         <button type="submit">Confirmar Cita</button>
                     </form>
                 </div>
@@ -786,6 +805,126 @@ def schedule_appointment(contact_id):
         </body>
         </html>
     ''', contact=contact, available_dates=available_dates)
+@app.route('/confirmed_appointments')
+def confirmed_appointments():
+    db_connection = MongoDBConnection()
+    appointment_collection = db_connection.get_collection('Appointments')
+    property_collection = db_connection.get_collection('Property')
+    agent_collection = db_connection.get_collection('Agent')
+
+    # Obtener todas las citas confirmadas
+    appointments = appointment_collection.find({'status': 'confirmada'})
+
+    # Lista para almacenar los detalles de cada cita
+    appointments_details = []
+
+    for appointment in appointments:
+        # Obtener detalles de la propiedad
+        property_info = property_collection.find_one({'_id': appointment['id_property']})
+
+        # Obtener detalles del agente
+        agent_info = agent_collection.find_one({'_id': appointment['agent_id']})
+
+        # Construir el diccionario con los detalles de la cita
+        appointment_detail = {
+            'property_name': property_info['name'] if property_info else 'N/A',
+            'agent_name': agent_info['name'] if agent_info else 'N/A',
+            'contact_name': appointment.get('name', 'N/A'),
+            'contact_phone': appointment.get('phone', 'N/A'),
+            'contact_email': appointment.get('email', 'N/A'),
+            'selected_date': appointment['selected_date'].strftime('%Y-%m-%d') if appointment.get('selected_date') else 'N/A',
+            'status': appointment['status']
+        }
+
+        appointments_details.append(appointment_detail)
+
+    db_connection.close()
+
+    # Renderizar la plantilla con los detalles de las citas
+    return render_template_string('''
+        <html lang="es">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Citas Confirmadas</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    background-color: #f4f4f4;
+                    margin: 0;
+                    padding: 0;
+                }
+                header {
+                    background-color: #007BFF;
+                    color: #fff;
+                    padding: 1rem 0;
+                    text-align: center;
+                }
+                .container {
+                    width: 80%;
+                    margin: 0 auto;
+                    padding: 1rem;
+                }
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin: 1rem 0;
+                }
+                table, th, td {
+                    border: 1px solid #ccc;
+                }
+                th, td {
+                    padding: 0.75rem;
+                    text-align: left;
+                }
+                th {
+                    background-color: #007BFF;
+                    color: white;
+                }
+                tr:nth-child(even) {
+                    background-color: #f2f2f2;
+                }
+            </style>
+        </head>
+        <body>
+            <header>
+                <div class="container">
+                    <h1>Citas Confirmadas</h1>
+                </div>
+            </header>
+            <div class="container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nombre de la Propiedad</th>
+                            <th>Nombre del Agente</th>
+                            <th>Nombre del Contacto</th>
+                            <th>Teléfono del Contacto</th>
+                            <th>Email del Contacto</th>
+                            <th>Fecha Elegida</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for appointment in appointments %}
+                        <tr>
+                            <td>{{ appointment.property_name }}</td>
+                            <td>{{ appointment.agent_name }}</td>
+                            <td>{{ appointment.contact_name }}</td>
+                            <td>{{ appointment.contact_phone }}</td>
+                            <td>{{ appointment.contact_email }}</td>
+                            <td>{{ appointment.selected_date }}</td>
+                            <td>{{ appointment.status }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </body>
+        </html>
+    ''', appointments=appointments_details)
+
+
 
 
 @app.route('/delete_agent/<agent_id>')
