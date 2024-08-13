@@ -43,149 +43,155 @@ def index():
         db_connection.close()
 
         html = """
-       <html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bienes Raíces</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-        }
-        header {
-            background-color: #007BFF;
-            color: #fff;
-            padding: 1rem 0;
-            text-align: center;
-            position: relative;
-        }
-        .container {
-            width: 80%;
-            margin: 0 auto;
-            overflow: hidden;
-        }
-        .login-button {
-            position: absolute;
-            top: 50%;
-            right: 1rem;
-            transform: translateY(-50%);
-            background-color: #fff;
-            color: #007BFF;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .login-button:hover {
-            background-color: #f0f0f0;
-        }
-        .add-property-button {
-            display: inline-block;
-            background-color: #007BFF;
-            color: #fff;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 5px;
-            cursor: pointer;
-            text-decoration: none;
-            margin-top: 1rem;
-        }
-        .add-property-button:hover {
-            background-color: #0056b3;
-        }
-        
-        .add-agent-button"{
-            display: inline-block;
-            background-color: #007BFF;
-            color: #fff;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 5px;
-            cursor: pointer;
-            text-decoration: none;
-            margin-top: 1rem;
-        }
-        
-        .add-agent-button:hover {
-            background-color: #0056b3;
-        }
-        
-        .property {
-            background: #fff;
-            margin: 1rem 0;
-            padding: 1rem;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            display: flex;
-            flex-direction: column;
-        }
-        .property-info {
-            display: flex;
-            flex-direction: column;
-        }
-        .property-images {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .property-images img {
-            width: 100px;
-            height: 75px;
-            object-fit: cover;
-            border-radius: 8px;
-        }
-        .property-info h2 {
-            margin-top: 0;
-        }
-        .property-info a {
-            text-decoration: none;
-            color: #007BFF;
-        }
-        .buttons {
-            margin-top: 1rem;
-        }
-        .buttons button {
-            background-color: #007BFF;
-            color: #fff;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-right: 0.5rem;
-        }
-        .buttons button:hover {
-            background-color: #0056b3;
-        }
-        footer {
-            background-color: #333;
-            color: #fff;
-            text-align: center;
-            padding: 1rem 0;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-        }
-    </style>
-</head>
-<body>
-    <header>
-        <div class="container">
-            <h1>Bienes Raíces</h1>
-            <a href="/add_property" class="add-property-button">Agregar Propiedad</a>
-            <a href="/add_agent" class="add-property-button">Agregar Agente</a>
-            <a href="/view_agents" class="add-property-button">Agente</a>
-            <a href="/view_interested" class="add-property-button">Interesados</a>
-            <a href="/confirmed_appointments" class="add-property-button">Citas Confirmadas</a>
-          
-
-            <a href="/login">
-                <button class="login-button">Iniciar Sesión</button>
-            </a>
-        </div>
-    </header>
+        <html lang="es">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Bienes Raíces</title>
+            <style>
+                body {
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                    margin: 0;
+                    padding: 0;
+                    background-color: #f4f4f4;
+                    color: #333;
+                }
+                header {
+                    background-color: #007BFF;
+                    color: #fff;
+                    padding: 1rem 0;
+                    text-align: center;
+                    position: relative;
+                }
+                .container {
+                    width: 90%;
+                    max-width: 1200px;
+                    margin: 0 auto;
+                    padding: 1rem;
+                }
+                .login-button {
+                    position: absolute;
+                    top: 50%;
+                    right: 1rem;
+                    transform: translateY(-50%);
+                    background-color: #fff;
+                    color: #007BFF;
+                    border: none;
+                    padding: 0.5rem 1rem;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    font-size: 1rem;
+                }
+                .login-button:hover {
+                    background-color: #e6e6e6;
+                }
+                .add-property-button {
+                    display: inline-block;
+                    background-color: #007BFF;
+                    color: #fff;
+                    border: none;
+                    padding: 0.75rem 1.5rem;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    text-decoration: none;
+                    font-size: 1rem;
+                    margin: 0.5rem;
+                }
+                .add-property-button:hover {
+                    background-color: #0056b3;
+                }
+                .property {
+                    background: #fff;
+                    margin: 1rem 0;
+                    padding: 1rem;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                    display: flex;
+                    flex-direction: column;
+                    align-items: flex-start;
+                }
+                .property-info {
+                    display: flex;
+                    flex-direction: column;
+                }
+                .property-images {
+                    display: flex;
+                    gap: 10px;
+                    margin: 1rem 0;
+                }
+                .property-images img {
+                    width: 150px;
+                    height: 100px;
+                    object-fit: cover;
+                    border-radius: 8px;
+                    transition: transform 0.3s;
+                }
+                .property-images img:hover {
+                    transform: scale(1.05);
+                }
+                .property-info h2 {
+                    margin: 0 0 1rem 0;
+                    font-size: 1.5rem;
+                    color: #007BFF;
+                }
+                .property-info p {
+                    margin: 0.5rem 0;
+                    font-size: 1rem;
+                }
+                .buttons {
+                    margin-top: 1rem;
+                }
+                .buttons a {
+                    text-decoration: none;
+                }
+                .buttons button {
+                    background-color: #007BFF;
+                    color: #fff;
+                    border: none;
+                    padding: 0.75rem 1.5rem;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    font-size: 1rem;
+                    margin-right: 0.5rem;
+                    transition: background-color 0.3s;
+                }
+                .buttons button:hover {
+                    background-color: #0056b3;
+                }
+                footer {
+                    background-color: #333;
+                    color: #fff;
+                    text-align: center;
+                    padding: 1rem 0;
+                    position: fixed;
+                    bottom: 0;
+                    width: 100%;
+                }
+                @media (max-width: 768px) {
+                    .property-images {
+                        flex-direction: column;
+                    }
+                    .property-images img {
+                        width: 100%;
+                        height: auto;
+                    }
+                }
+            </style>
+        </head>
+        <body>
+            <header>
+                <div class="container">
+                    <h1>Bienes Raíces</h1>
+                    <a href="/add_property" class="add-property-button">Agregar Propiedad</a>
+                    <a href="/add_agent" class="add-property-button">Agregar Agente</a>
+                    <a href="/view_agents" class="add-property-button">Ver Agentes</a>
+                    <a href="/view_interested" class="add-property-button">Interesados</a>
+                    <a href="/confirmed_appointments" class="add-property-button">Citas Confirmadas</a>
+                    <a href="/login">
+                        <button class="login-button">Iniciar Sesión</button>
+                    </a>
+                </div>
+            </header>
             <div class="container">
                 <h2>Propiedades Destacadas</h2>
                 <div class="properties">
@@ -203,7 +209,7 @@ def index():
                                 {% endfor %}
                             </div>
                             <div class="buttons">
-                              <a href="{{ url_for('details', property_id=property.id) }}"><button>Detalles</button></a>
+                                <a href="{{ url_for('details', property_id=property.id) }}"><button>Detalles</button></a>
                                 <a href="{{ url_for('edit_property', property_id=property.id) }}"><button>Editar</button></a>
                                 <a href="{{ url_for('delete_property', property_id=property.id) }}"><button>Eliminar</button></a>
                             </div>
@@ -212,6 +218,7 @@ def index():
                     {% endfor %}
                 </div>
             </div>
+            
         </body>
         </html>
         """
@@ -219,9 +226,7 @@ def index():
 
     except Exception as e:
         return f"Error en la operación de MongoDB: {e}"
-    
-    
-    
+
 @app.route('/add_agent', methods=['GET', 'POST'])
 def add_agent():
     if request.method == 'POST':
@@ -275,68 +280,126 @@ def add_agent():
         <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            
             <title>Agregar Agente</title>
             <style>
                 body {
-                    font-family: Arial, sans-serif;
-                    background-color: #f4f4f4;
-                    padding: 20px;
+                    font-family: 'Arial', sans-serif;
+                    background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+                    margin: 0;
+                    padding: 0;
+                }
+                header {
+                    background-color: #007bff;
+                    color: #fff;
+                    padding: 1rem;
+                    text-align: center;
+                }
+                .header-title {
+                    margin: 0;
+                    font-size: 2rem;
+                    font-weight: 600;
+                }
+                .header-nav {
+                    margin-top: 0.5rem;
+                }
+                .header-nav a {
+                    color: #fff;
+                    text-decoration: none;
+                    margin: 0 0.5rem;
+                    font-size: 1rem;
+                    transition: color 0.3s ease;
+                }
+                .header-nav a:hover {
+                    color: #d0d0d0;
                 }
                 .form-container {
-                    background-color: #fff;
-                    padding: 20px;
-                    border-radius: 8px;
-                    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+                    background-color: #ffffff;
+                    padding: 2rem;
+                    border-radius: 16px;
+                    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+                    width: 100%;
+                    max-width: 600px;
+                    margin: 2rem auto;
+                    box-sizing: border-box;
+                    border: 1px solid #ddd;
+                }
+                h2 {
+                    margin-bottom: 1.5rem;
+                    font-size: 1.75rem;
+                    color: #333;
+                    text-align: center;
+                    font-weight: 600;
                 }
                 .form-group {
-                    margin-bottom: 15px;
+                    margin-bottom: 1.5rem;
                 }
                 .form-group label {
                     display: block;
-                    margin-bottom: 5px;
+                    margin-bottom: 0.5rem;
+                    font-weight: 500;
+                    color: #555;
                 }
                 .form-group input {
                     width: 100%;
-                    padding: 8px;
+                    padding: 0.75rem;
+                    border: 1px solid #ddd;
+                    border-radius: 12px;
                     box-sizing: border-box;
-                    border: 1px solid #ccc;
-                    border-radius: 4px;
+                    font-size: 1rem;
+                    color: #333;
+                    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+                }
+                .form-group input:focus {
+                    border-color: #007bff;
+                    box-shadow: 0 0 8px rgba(0, 123, 255, 0.5);
+                    outline: none;
                 }
                 .form-group button {
-                    background-color: #007BFF;
-                    color: #fff;
+                    background-color: #007bff;
+                    color: #ffffff;
                     border: none;
-                    padding: 10px 15px;
-                    border-radius: 4px;
+                    padding: 0.75rem 1.5rem;
+                    border-radius: 12px;
                     cursor: pointer;
+                    font-size: 1rem;
+                    transition: background-color 0.3s ease, transform 0.3s ease;
                 }
                 .form-group button:hover {
                     background-color: #0056b3;
+                    transform: translateY(-2px);
                 }
-                
-                 
                 .back-button {
                     display: inline-block;
-                    margin-top: 20px;
-                    padding: 10px 15px;
+                    margin-top: 1rem;
+                    padding: 0.75rem 1.5rem;
                     background-color: #6c757d;
-                    color: #fff;
+                    color: #ffffff;
                     border: none;
-                    border-radius: 4px;
+                    border-radius: 12px;
                     cursor: pointer;
                     text-decoration: none;
-                    font-size: 16px;
+                    text-align: center;
+                    font-size: 1rem;
+                    transition: background-color 0.3s ease, transform 0.3s ease;
                 }
                 .back-button:hover {
                     background-color: #5a6268;
+                    transform: translateY(-2px);
                 }
             </style>
         </head>
         <body>
+            <header>
+                <h1 class="header-title">Tienda Electric</h1>
+                <nav class="header-nav">
+                    <a href="{{ url_for('index') }}">Menú</a>
+                    <a href="{{ url_for('view_agents') }}">Agentes</a>
+                    <!-- Agrega más enlaces según sea necesario -->
+                </nav>
+            </header>
             <div class="form-container">
                 <h2>Agregar Nuevo Agente</h2>
-                <a href="{{ url_for('index') }}" class="back-button">Menú</a>
+                
                 <form method="post">
                     <div class="form-group">
                         <label for="name">Nombre:</label>
@@ -387,7 +450,6 @@ def add_agent():
                     </div>
                 </form>
             </div>
-            
         </body>
         </html>
     ''')
@@ -421,58 +483,91 @@ def view_agents():
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>Lista de Agentes</title>
-            
+             
             <style>
                 body {
-                    font-family: Arial, sans-serif;
-                    background-color: #f4f4f4;
-                    padding: 20px;
+                    font-family: 'Arial', sans-serif;
+                    background-color: #f0f2f5;
+                    margin: 0;
+                    padding: 0;
+                }
+                header {
+                    background-color: #007bff;
+                    color: #ffffff;
+                    padding: 1rem;
+                    text-align: center;
+                }
+                .header-title {
+                    margin: 0;
+                    font-size: 2rem;
+                    font-weight: 600;
+                }
+                  .header-nav {
+                    margin-top: 0.5rem;
+                }
+                .header-nav a {
+                    color: #fff;
+                    text-decoration: none;
+                    margin: 0 0.5rem;
+                    font-size: 1rem;
+                    transition: color 0.3s ease;
+                }
+                .header-nav a:hover {
+                    color: #d0d0d0;
                 }
                 .agents-container {
-                    background-color: #fff;
-                    padding: 20px;
+                    max-width: 1200px;
+                    margin: 2rem auto;
+                    padding: 2rem;
+                    background-color: #ffffff;
                     border-radius: 8px;
-                    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                }
+                h2 {
+                    margin-top: 0;
+                    font-size: 2rem;
+                    color: #333;
                 }
                 .agent {
-                    margin-bottom: 15px;
-                    padding: 10px;
-                    border: 1px solid #ccc;
-                    border-radius: 4px;
-                    background-color: #fafafa;
                     display: flex;
                     align-items: center;
                     justify-content: space-between;
+                    padding: 1rem;
+                    margin-bottom: 1rem;
+                    border-radius: 8px;
+                    background-color: #f9f9f9;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
                 }
                 .agent img {
                     width: 100px;
                     height: 100px;
                     border-radius: 50%;
-                    margin-right: 20px;
+                    margin-right: 1rem;
                 }
                 .agent h3 {
                     margin: 0;
+                    font-size: 1.5rem;
+                    color: #333;
                 }
                 .agent p {
-                    margin: 5px 0;
+                    margin: 0.5rem 0;
+                    color: #555;
                 }
-                
                 .edit-button, .delete-button {
-                    display: inline-block;
-                    margin-left: 10px;
-                    padding: 5px 10px;
-                    color: #fff;
+                    padding: 0.5rem 1rem;
                     border: none;
                     border-radius: 4px;
-                    cursor: pointer;
+                    color: #ffffff;
                     text-decoration: none;
-                    font-size: 14px;
+                    font-size: 0.9rem;
+                    cursor: pointer;
+                    transition: background-color 0.3s ease;
                 }
                 .edit-button {
-                    background-color: #007bff;
+                    background-color: #28a745;
                 }
                 .edit-button:hover {
-                    background-color: #0056b3;
+                    background-color: #218838;
                 }
                 .delete-button {
                     background-color: #dc3545;
@@ -482,15 +577,16 @@ def view_agents():
                 }
                 .back-button {
                     display: inline-block;
-                    margin-top: 20px;
-                    padding: 10px 15px;
+                    margin-top: 1.5rem;
+                    padding: 0.75rem 1.25rem;
                     background-color: #6c757d;
-                    color: #fff;
+                    color: #ffffff;
                     border: none;
                     border-radius: 4px;
                     cursor: pointer;
                     text-decoration: none;
-                    font-size: 16px;
+                    font-size: 1rem;
+                    transition: background-color 0.3s ease;
                 }
                 .back-button:hover {
                     background-color: #5a6268;
@@ -498,9 +594,16 @@ def view_agents():
             </style>
         </head>
         <body>
+            <header>
+                <h1 class="header-title">Tienda Electric</h1>
+                <nav class="header-nav">
+                    <a href="{{ url_for('index') }}">Menú</a>
+                 
+                </nav>
+            </header>
             <div class="agents-container">
                 <h2>Lista de Agentes Registrados</h2>
-                <a href="{{ url_for('index') }}" class="back-button">Menú</a>
+                
                 {% for agent in agents %}
                 <div class="agent">
                     <img src="{{ agent.image }}" alt="Imagen de {{ agent.name }}">
@@ -520,6 +623,7 @@ def view_agents():
         </body>
         </html>
     ''', agents=agents)
+
 @app.route('/view_interested')
 def view_interested():
     db_connection = MongoDBConnection()
@@ -553,6 +657,30 @@ def view_interested():
                     background-color: #f0f2f5;
                     margin: 0;
                     padding: 0;
+                }
+                 header {
+                    background-color: #007bff;
+                    color: #ffffff;
+                    padding: 1rem;
+                    text-align: center;
+                }
+                .header-title {
+                    margin: 0;
+                    font-size: 2rem;
+                    font-weight: 600;
+                }
+                  .header-nav {
+                    margin-top: 0.5rem;
+                }
+                .header-nav a {
+                    color: #fff;
+                    text-decoration: none;
+                    margin: 0 0.5rem;
+                    font-size: 1rem;
+                    transition: color 0.3s ease;
+                }
+                .header-nav a:hover {
+                    color: #d0d0d0;
                 }
                 .container {
                     max-width: 900px;
@@ -642,10 +770,17 @@ def view_interested():
                 }
             </style>
         </head>
+        <header>
+                <h1 class="header-title">Tienda Electric</h1>
+                <nav class="header-nav">
+                    <a href="{{ url_for('index') }}">Menú</a>
+                 
+          </nav>
+            </header>
         <body>
             <div class="container">
                 <h2>Lista de Interesados</h2>
-                <a href="{{ url_for('index') }}" class="back-button">Menú</a>
+
                 {% for contact in contacts %}
                 <div class="contact-card">
                     <div class="contact-details">
@@ -653,7 +788,7 @@ def view_interested():
                         <p><strong><span class="contact-icon">📞</span>Teléfono:</strong> {{ contact.phone }}</p>
                         <p><strong><span class="contact-icon">📧</span>Email:</strong> {{ contact.email }}</p>
                         <p><strong><span class="contact-icon">💬</span>Mensaje:</strong> {{ contact.message }}</p>
-                        <p><strong><span class="contact-icon">📅</span>Fecha de Contacto:</strong> {{ contact.date_contact }}</p>
+                       
                         <p><strong><span class="contact-icon">📅</span>Fechas Disponibles:</strong>
                         {% if contact.available_dates %}
                             <ul>
@@ -731,54 +866,76 @@ def schedule_appointment(contact_id):
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>Programar Cita</title>
+             
             <style>
                 body {
-                    font-family: Arial, sans-serif;
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
                     margin: 0;
                     padding: 0;
-                    background-color: #f4f4f4;
+                    background-color: #f0f2f5;
+                    color: #333;
                 }
                 header {
-                    background-color: #007BFF;
+                    background-color: #0044cc;
                     color: #fff;
                     padding: 1rem 0;
                     text-align: center;
+                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
                 }
                 .container {
-                    width: 80%;
+                    width: 90%;
+                    max-width: 1200px;
                     margin: 0 auto;
-                    overflow: hidden;
                 }
                 .schedule-form {
                     background: #fff;
-                    margin: 1rem 0;
-                    padding: 1rem;
-                    border-radius: 8px;
-                    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+                    margin: 2rem 0;
+                    padding: 2rem;
+                    border-radius: 10px;
+                    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
                 }
                 .schedule-form h2 {
                     margin-top: 0;
+                    font-size: 1.5rem;
+                    color: #0044cc;
                 }
-                .schedule-form input, .schedule-form select {
+                .schedule-form label {
+                    display: block;
+                    margin-bottom: 0.5rem;
+                    font-size: 1rem;
+                    color: #666;
+                }
+                .schedule-form select, .schedule-form input {
                     width: 100%;
-                    padding: 10px;
+                    padding: 12px;
                     margin: 5px 0 10px 0;
-                    border: 1px solid #ccc;
-                    border-radius: 5px;
+                    border: 1px solid #ddd;
+                    border-radius: 8px;
+                    font-size: 1rem;
+                    color: #333;
                 }
                 .schedule-form button {
                     display: block;
                     width: 100%;
-                    padding: 1rem;
+                    padding: 12px;
                     font-size: 1rem;
                     color: #fff;
-                    background-color: #007BFF;
+                    background-color: #0044cc;
                     border: none;
-                    border-radius: 5px;
+                    border-radius: 8px;
                     cursor: pointer;
+                    transition: background-color 0.3s, transform 0.2s;
                 }
                 .schedule-form button:hover {
-                    background-color: #0056b3;
+                    background-color: #0033a0;
+                    transform: translateY(-2px);
+                }
+                .schedule-form button:active {
+                    transform: translateY(0);
+                }
+                .schedule-form select:focus, .schedule-form input:focus {
+                    border-color: #0044cc;
+                    outline: none;
                 }
             </style>
         </head>
@@ -786,6 +943,7 @@ def schedule_appointment(contact_id):
             <header>
                 <div class="container">
                     <h1>Programar Cita</h1>
+                    
                 </div>
             </header>
             <div class="container">
@@ -794,9 +952,13 @@ def schedule_appointment(contact_id):
                     <form method="POST">
                         <label for="selected_date">Fecha:</label>
                         <select name="selected_date" id="selected_date" required>
-                            {% for date in available_dates %}
-                                <option value="{{ date }}">{{ date }}</option>
-                            {% endfor %}
+                            {% if available_dates %}
+                                {% for date in available_dates %}
+                                    <option value="{{ date }}">{{ date }}</option>
+                                {% endfor %}
+                            {% else %}
+                                <option value="">No hay fechas disponibles</option>
+                            {% endif %}
                         </select>
                         <button type="submit">Confirmar Cita</button>
                     </form>
@@ -805,6 +967,7 @@ def schedule_appointment(contact_id):
         </body>
         </html>
     ''', contact=contact, available_dates=available_dates)
+
 @app.route('/confirmed_appointments')
 def confirmed_appointments():
     db_connection = MongoDBConnection()
@@ -849,51 +1012,84 @@ def confirmed_appointments():
             <title>Citas Confirmadas</title>
             <style>
                 body {
-                    font-family: Arial, sans-serif;
-                    background-color: #f4f4f4;
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                    background-color: #f8f9fa;
                     margin: 0;
                     padding: 0;
                 }
                 header {
-                    background-color: #007BFF;
-                    color: #fff;
-                    padding: 1rem 0;
+                    background-color: #007bff;
+                    color: #ffffff;
+                    padding: 1rem;
                     text-align: center;
                 }
+                .header-title {
+                    margin: 0;
+                    font-size: 2rem;
+                    font-weight: 600;
+                }
+                  .header-nav {
+                    margin-top: 0.5rem;
+                }
+                .header-nav a {
+                    color: #fff;
+                    text-decoration: none;
+                    margin: 0 0.5rem;
+                    font-size: 1rem;
+                    transition: color 0.3s ease;
+                }
+                .header-nav a:hover {
+                    color: #d0d0d0;
+                }
                 .container {
-                    width: 80%;
-                    margin: 0 auto;
-                    padding: 1rem;
+                    width: 90%;
+                    max-width: 1200px;
+                    margin: 2rem auto;
+                    padding: 1.5rem;
+                    background-color: #ffffff;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
                 }
                 table {
                     width: 100%;
-                    border-collapse: collapse;
+                    border-collapse: separate;
+                    border-spacing: 0;
                     margin: 1rem 0;
                 }
-                table, th, td {
-                    border: 1px solid #ccc;
-                }
                 th, td {
-                    padding: 0.75rem;
+                    padding: 1rem;
                     text-align: left;
+                    border-bottom: 1px solid #dee2e6;
                 }
                 th {
-                    background-color: #007BFF;
-                    color: white;
+                    background-color: #007bff;
+                    color: #ffffff;
+                    font-weight: bold;
                 }
                 tr:nth-child(even) {
                     background-color: #f2f2f2;
+                }
+                tr:hover {
+                    background-color: #e9ecef;
+                }
+                caption {
+                    padding: 0.5rem;
+                    font-size: 1.25rem;
+                    font-weight: bold;
+                    color: #343a40;
                 }
             </style>
         </head>
         <body>
             <header>
-                <div class="container">
-                    <h1>Citas Confirmadas</h1>
-                </div>
+                <h1 class="header-title">Tienda Electric</h1>
+                <nav class="header-nav">
+                    <a href="{{ url_for('index') }}">Menú</a>
+                </nav>
             </header>
             <div class="container">
                 <table>
+                    <caption>Citas Confirmadas</caption>
                     <thead>
                         <tr>
                             <th>Nombre de la Propiedad</th>
@@ -923,6 +1119,7 @@ def confirmed_appointments():
         </body>
         </html>
     ''', appointments=appointments_details)
+
 
 
 
