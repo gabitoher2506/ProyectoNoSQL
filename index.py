@@ -1,9 +1,11 @@
-from flask import Flask, render_template_string, redirect, url_for, request
+from flask import Flask, render_template,request,redirect, url_for, request, session
 from pymongo import MongoClient
 from bson import ObjectId
-from datetime import datetime 
+from datetime import datetime
+from pymongo import MongoClient
 
 app = Flask(__name__)
+app.secret_key = '12345'
 
 class MongoDBConnection:
     def __init__(self, uri='mongodb+srv://msolano80258:Francia9192@cluster0.6uxqadh.mongodb.net/?retryWrites=true&w=majority'):
@@ -42,190 +44,51 @@ def index():
 
         db_connection.close()
 
-        html = """
-        <html lang="es">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Bienes Raíces</title>
-            <style>
-                body {
-                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                    margin: 0;
-                    padding: 0;
-                    background-color: #f4f4f4;
-                    color: #333;
-                }
-                header {
-                    background-color: #007BFF;
-                    color: #fff;
-                    padding: 1rem 0;
-                    text-align: center;
-                    position: relative;
-                }
-                .container {
-                    width: 90%;
-                    max-width: 1200px;
-                    margin: 0 auto;
-                    padding: 1rem;
-                }
-                .login-button {
-                    position: absolute;
-                    top: 50%;
-                    right: 1rem;
-                    transform: translateY(-50%);
-                    background-color: #fff;
-                    color: #007BFF;
-                    border: none;
-                    padding: 0.5rem 1rem;
-                    border-radius: 5px;
-                    cursor: pointer;
-                    font-size: 1rem;
-                }
-                .login-button:hover {
-                    background-color: #e6e6e6;
-                }
-                .add-property-button {
-                    display: inline-block;
-                    background-color: #007BFF;
-                    color: #fff;
-                    border: none;
-                    padding: 0.75rem 1.5rem;
-                    border-radius: 5px;
-                    cursor: pointer;
-                    text-decoration: none;
-                    font-size: 1rem;
-                    margin: 0.5rem;
-                }
-                .add-property-button:hover {
-                    background-color: #0056b3;
-                }
-                .property {
-                    background: #fff;
-                    margin: 1rem 0;
-                    padding: 1rem;
-                    border-radius: 8px;
-                    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-                    display: flex;
-                    flex-direction: column;
-                    align-items: flex-start;
-                }
-                .property-info {
-                    display: flex;
-                    flex-direction: column;
-                }
-                .property-images {
-                    display: flex;
-                    gap: 10px;
-                    margin: 1rem 0;
-                }
-                .property-images img {
-                    width: 150px;
-                    height: 100px;
-                    object-fit: cover;
-                    border-radius: 8px;
-                    transition: transform 0.3s;
-                }
-                .property-images img:hover {
-                    transform: scale(1.05);
-                }
-                .property-info h2 {
-                    margin: 0 0 1rem 0;
-                    font-size: 1.5rem;
-                    color: #007BFF;
-                }
-                .property-info p {
-                    margin: 0.5rem 0;
-                    font-size: 1rem;
-                }
-                .buttons {
-                    margin-top: 1rem;
-                }
-                .buttons a {
-                    text-decoration: none;
-                }
-                .buttons button {
-                    background-color: #007BFF;
-                    color: #fff;
-                    border: none;
-                    padding: 0.75rem 1.5rem;
-                    border-radius: 5px;
-                    cursor: pointer;
-                    font-size: 1rem;
-                    margin-right: 0.5rem;
-                    transition: background-color 0.3s;
-                }
-                .buttons button:hover {
-                    background-color: #0056b3;
-                }
-                footer {
-                    background-color: #333;
-                    color: #fff;
-                    text-align: center;
-                    padding: 1rem 0;
-                    position: fixed;
-                    bottom: 0;
-                    width: 100%;
-                }
-                @media (max-width: 768px) {
-                    .property-images {
-                        flex-direction: column;
-                    }
-                    .property-images img {
-                        width: 100%;
-                        height: auto;
-                    }
-                }
-            </style>
-        </head>
-        <body>
-            <header>
-                <div class="container">
-                    <h1>Bienes Raíces</h1>
-                    <a href="/add_property" class="add-property-button">Agregar Propiedad</a>
-                    <a href="/add_agent" class="add-property-button">Agregar Agente</a>
-                    <a href="/view_agents" class="add-property-button">Ver Agentes</a>
-                    <a href="/view_interested" class="add-property-button">Interesados</a>
-                    <a href="/confirmed_appointments" class="add-property-button">Citas Confirmadas</a>
-                    <a href="/login">
-                        <button class="login-button">Iniciar Sesión</button>
-                    </a>
-                </div>
-            </header>
-            <div class="container">
-                <h2>Propiedades Destacadas</h2>
-                <div class="properties">
-                    {% for property in properties %}
-                    <div class="property">
-                        <div class="property-info">
-                            <h2>{{ property.name }}</h2>
-                            <p><strong>Precio:</strong> ${{ property.price }}</p>
-                            <p><strong>Tipo de Transacción:</strong> {{ property.transaction_type }}</p>
-                            <p><strong>Años de Antigüedad:</strong> {{ property.antiquity }}</p>
-                            <p><strong>Propietario:</strong> {{ property.owner }}</p>
-                            <div class="property-images">
-                                {% for image in property.images %}
-                                <img src="{{ image }}" alt="Imagen de la propiedad">
-                                {% endfor %}
-                            </div>
-                            <div class="buttons">
-                                <a href="{{ url_for('details', property_id=property.id) }}"><button>Detalles</button></a>
-                                <a href="{{ url_for('edit_property', property_id=property.id) }}"><button>Editar</button></a>
-                                <a href="{{ url_for('delete_property', property_id=property.id) }}"><button>Eliminar</button></a>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-            
-        </body>
-        </html>
-        """
-        return render_template_string(html, properties=property_list)
+        return render_template('index.html', properties=property_list)
 
     except Exception as e:
         return f"Error en la operación de MongoDB: {e}"
+    
+    
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        password = request.form.get('password')
+
+        db_connection = MongoDBConnection()
+        users_collection = db_connection.get_collection('Users')
+        roles_collection = db_connection.get_collection('Rol')
+
+        user = users_collection.find_one({'email': email})
+
+        if user and user.get('password') == password:
+            role_id = user.get('role_id') 
+            role = roles_collection.find_one({'_id': ObjectId(role_id)})  
+            role_name = role.get('name') if role else 'Desconocido'
+            
+            session['user_id'] = str(user['_id'])
+            session['user_role'] = role_name  
+            
+            db_connection.close()
+            return redirect(url_for('index'))
+        else:
+            db_connection.close()
+            return render_template('login.html', error='Credenciales incorrectas.')
+
+    return render_template('login.html')
+
+
+
+@app.route('/logout')
+def logout():
+    # Eliminar los datos de la sesión del usuario
+    session.pop('user_id', None)
+    session.pop('user_role', None)
+    # Redirigir al usuario a la página de inicio de sesión o de inicio
+    return redirect(url_for('login'))
+
+
 
 @app.route('/add_agent', methods=['GET', 'POST'])
 def add_agent():
@@ -235,6 +98,14 @@ def add_agent():
         roles_collection = db_connection.get_collection('Rol')
         agents_collection = db_connection.get_collection('Agent')
         
+        # Asignar rol de "Agente"
+        role = roles_collection.find_one({"name": "Agente"})
+        role_id = str(role['_id']) if role else None
+
+        if not role_id:
+            db_connection.close()
+            return render_template('add_agent.html', error='Rol de Agente no encontrado.')
+
         # Crear nuevo usuario
         new_user = {
             "password": request.form['password'],
@@ -245,21 +116,13 @@ def add_agent():
             "identification": request.form['identification'],
             "email": request.form['email'],
             "phone": request.form['phone'],
-            "image": request.form['image']
+            "image": request.form['image'],
+            "role_id": role_id  # Agregar role_id al usuario
         }
         
         # Insertar el nuevo usuario en la colección Users
         user_id = users_collection.insert_one(new_user).inserted_id
         
-        # Asignar rol de "Agente" al nuevo usuario
-        new_role = {
-            "name": "Agente",
-            "id_user": str(user_id)
-        }
-        
-        # Insertar el rol en la colección Rol
-        roles_collection.insert_one(new_role)
-
         # Crear un nuevo documento en la colección Agent
         new_agent = {
             "id_user": str(user_id),
@@ -275,184 +138,7 @@ def add_agent():
         db_connection.close()
         return redirect(url_for('view_agents'))
 
-    return render_template_string('''
-        <html lang="es">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Agregar Agente</title>
-            <style>
-                body {
-                    font-family: 'Arial', sans-serif;
-                    background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
-                    margin: 0;
-                    padding: 0;
-                }
-                header {
-                    background-color: #007bff;
-                    color: #fff;
-                    padding: 1rem;
-                    text-align: center;
-                }
-                .header-title {
-                    margin: 0;
-                    font-size: 2rem;
-                    font-weight: 600;
-                }
-                .header-nav {
-                    margin-top: 0.5rem;
-                }
-                .header-nav a {
-                    color: #fff;
-                    text-decoration: none;
-                    margin: 0 0.5rem;
-                    font-size: 1rem;
-                    transition: color 0.3s ease;
-                }
-                .header-nav a:hover {
-                    color: #d0d0d0;
-                }
-                .form-container {
-                    background-color: #ffffff;
-                    padding: 2rem;
-                    border-radius: 16px;
-                    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-                    width: 100%;
-                    max-width: 600px;
-                    margin: 2rem auto;
-                    box-sizing: border-box;
-                    border: 1px solid #ddd;
-                }
-                h2 {
-                    margin-bottom: 1.5rem;
-                    font-size: 1.75rem;
-                    color: #333;
-                    text-align: center;
-                    font-weight: 600;
-                }
-                .form-group {
-                    margin-bottom: 1.5rem;
-                }
-                .form-group label {
-                    display: block;
-                    margin-bottom: 0.5rem;
-                    font-weight: 500;
-                    color: #555;
-                }
-                .form-group input {
-                    width: 100%;
-                    padding: 0.75rem;
-                    border: 1px solid #ddd;
-                    border-radius: 12px;
-                    box-sizing: border-box;
-                    font-size: 1rem;
-                    color: #333;
-                    transition: border-color 0.3s ease, box-shadow 0.3s ease;
-                }
-                .form-group input:focus {
-                    border-color: #007bff;
-                    box-shadow: 0 0 8px rgba(0, 123, 255, 0.5);
-                    outline: none;
-                }
-                .form-group button {
-                    background-color: #007bff;
-                    color: #ffffff;
-                    border: none;
-                    padding: 0.75rem 1.5rem;
-                    border-radius: 12px;
-                    cursor: pointer;
-                    font-size: 1rem;
-                    transition: background-color 0.3s ease, transform 0.3s ease;
-                }
-                .form-group button:hover {
-                    background-color: #0056b3;
-                    transform: translateY(-2px);
-                }
-                .back-button {
-                    display: inline-block;
-                    margin-top: 1rem;
-                    padding: 0.75rem 1.5rem;
-                    background-color: #6c757d;
-                    color: #ffffff;
-                    border: none;
-                    border-radius: 12px;
-                    cursor: pointer;
-                    text-decoration: none;
-                    text-align: center;
-                    font-size: 1rem;
-                    transition: background-color 0.3s ease, transform 0.3s ease;
-                }
-                .back-button:hover {
-                    background-color: #5a6268;
-                    transform: translateY(-2px);
-                }
-            </style>
-        </head>
-        <body>
-            <header>
-                <h1 class="header-title">Tienda Electric</h1>
-                <nav class="header-nav">
-                    <a href="{{ url_for('index') }}">Menú</a>
-                    <a href="{{ url_for('view_agents') }}">Agentes</a>
-                    <!-- Agrega más enlaces según sea necesario -->
-                </nav>
-            </header>
-            <div class="form-container">
-                <h2>Agregar Nuevo Agente</h2>
-                
-                <form method="post">
-                    <div class="form-group">
-                        <label for="name">Nombre:</label>
-                        <input type="text" id="name" name="name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="first_sur_name">Primer Apellido:</label>
-                        <input type="text" id="first_sur_name" name="first_sur_name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="second_sur_name">Segundo Apellido:</label>
-                        <input type="text" id="second_sur_name" name="second_sur_name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="identification">Identificación:</label>
-                        <input type="text" id="identification" name="identification" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="birth_date">Fecha de Nacimiento:</label>
-                        <input type="date" id="birth_date" name="birth_date" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="email">Correo Electrónico:</label>
-                        <input type="email" id="email" name="email" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="phone">Teléfono:</label>
-                        <input type="text" id="phone" name="phone" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="password">Contraseña:</label>
-                        <input type="password" id="password" name="password" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="image">URL de la Imagen:</label>
-                        <input type="text" id="image" name="image">
-                    </div>
-                    <div class="form-group">
-                        <label for="salary">Salario:</label>
-                        <input type="text" id="salary" name="salary" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="experience">Experiencia:</label>
-                        <input type="text" id="experience" name="experience" required>
-                    </div>
-                    <div class="form-group">
-                        <button type="submit">Agregar Agente</button>
-                    </div>
-                </form>
-            </div>
-        </body>
-        </html>
-    ''')
+    return render_template('add_agent.html')
 
 @app.route('/view_agents')
 def view_agents():
@@ -469,160 +155,14 @@ def view_agents():
             agent['image'] = user.get('image', '')
 
         # Convertir la fecha de contratación a cadena en formato 'dd/mm/yyyy'
-        if isinstance(agent.get('hire_date'), str):
-            try:
-                agent['hire_date'] = datetime.fromisoformat(agent['hire_date']).strftime('%d/%m/%Y')
-            except ValueError:
-                agent['hire_date'] = 'No disponible'
+        if isinstance(agent.get('hire_date'), datetime):
+            agent['hire_date'] = agent['hire_date'].strftime('%d/%m/%Y')
+        else:
+            agent['hire_date'] = 'No disponible'
 
     db_connection.close()
 
-    return render_template_string('''
-        <html lang="es">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Lista de Agentes</title>
-             
-            <style>
-                body {
-                    font-family: 'Arial', sans-serif;
-                    background-color: #f0f2f5;
-                    margin: 0;
-                    padding: 0;
-                }
-                header {
-                    background-color: #007bff;
-                    color: #ffffff;
-                    padding: 1rem;
-                    text-align: center;
-                }
-                .header-title {
-                    margin: 0;
-                    font-size: 2rem;
-                    font-weight: 600;
-                }
-                  .header-nav {
-                    margin-top: 0.5rem;
-                }
-                .header-nav a {
-                    color: #fff;
-                    text-decoration: none;
-                    margin: 0 0.5rem;
-                    font-size: 1rem;
-                    transition: color 0.3s ease;
-                }
-                .header-nav a:hover {
-                    color: #d0d0d0;
-                }
-                .agents-container {
-                    max-width: 1200px;
-                    margin: 2rem auto;
-                    padding: 2rem;
-                    background-color: #ffffff;
-                    border-radius: 8px;
-                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-                }
-                h2 {
-                    margin-top: 0;
-                    font-size: 2rem;
-                    color: #333;
-                }
-                .agent {
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                    padding: 1rem;
-                    margin-bottom: 1rem;
-                    border-radius: 8px;
-                    background-color: #f9f9f9;
-                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-                }
-                .agent img {
-                    width: 100px;
-                    height: 100px;
-                    border-radius: 50%;
-                    margin-right: 1rem;
-                }
-                .agent h3 {
-                    margin: 0;
-                    font-size: 1.5rem;
-                    color: #333;
-                }
-                .agent p {
-                    margin: 0.5rem 0;
-                    color: #555;
-                }
-                .edit-button, .delete-button {
-                    padding: 0.5rem 1rem;
-                    border: none;
-                    border-radius: 4px;
-                    color: #ffffff;
-                    text-decoration: none;
-                    font-size: 0.9rem;
-                    cursor: pointer;
-                    transition: background-color 0.3s ease;
-                }
-                .edit-button {
-                    background-color: #28a745;
-                }
-                .edit-button:hover {
-                    background-color: #218838;
-                }
-                .delete-button {
-                    background-color: #dc3545;
-                }
-                .delete-button:hover {
-                    background-color: #c82333;
-                }
-                .back-button {
-                    display: inline-block;
-                    margin-top: 1.5rem;
-                    padding: 0.75rem 1.25rem;
-                    background-color: #6c757d;
-                    color: #ffffff;
-                    border: none;
-                    border-radius: 4px;
-                    cursor: pointer;
-                    text-decoration: none;
-                    font-size: 1rem;
-                    transition: background-color 0.3s ease;
-                }
-                .back-button:hover {
-                    background-color: #5a6268;
-                }
-            </style>
-        </head>
-        <body>
-            <header>
-                <h1 class="header-title">Tienda Electric</h1>
-                <nav class="header-nav">
-                    <a href="{{ url_for('index') }}">Menú</a>
-                 
-                </nav>
-            </header>
-            <div class="agents-container">
-                <h2>Lista de Agentes Registrados</h2>
-                
-                {% for agent in agents %}
-                <div class="agent">
-                    <img src="{{ agent.image }}" alt="Imagen de {{ agent.name }}">
-                    <div>
-                        <h3>{{ agent.name }}</h3>
-                        <p><strong>Salario:</strong> {{ agent.salary }}</p>
-                        <p><strong>Experiencia:</strong> {{ agent.experience }}</p>
-                        <p><strong>Fecha de Contratación:</strong> {{ agent.hire_date }}</p>
-                    </div>
-                    <div>
-                        <a href="{{ url_for('edit_agent', agent_id=agent._id) }}" class="edit-button">Editar</a>
-                        <a href="{{ url_for('delete_agent', agent_id=agent._id) }}" class="delete-button" onclick="return confirm('¿Estás seguro de que quieres eliminar este agente?')">Eliminar</a>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </body>
-        </html>
-    ''', agents=agents)
+    return render_template('view_agents.html', agents=agents)
 
 @app.route('/view_interested')
 def view_interested():
@@ -633,11 +173,8 @@ def view_interested():
 
     # Convertir la fecha de contacto a cadena en formato 'dd/mm/yyyy'
     for contact in contacts:
-        if isinstance(contact.get('date_contact'), str):
-            try:
-                contact['date_contact'] = datetime.fromisoformat(contact['date_contact']).strftime('%d/%m/%Y')
-            except ValueError:
-                contact['date_contact'] = 'No disponible'
+        if isinstance(contact.get('date_contact'), datetime):
+            contact['date_contact'] = contact['date_contact'].strftime('%d/%m/%Y')
         else:
             contact['date_contact'] = 'No disponible'
         # Convertir _id a cadena para usar en la plantilla
@@ -645,169 +182,7 @@ def view_interested():
 
     db_connection.close()
 
-    return render_template_string('''
-        <html lang="es">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Lista de Interesados</title>
-            <style>
-                body {
-                    font-family: 'Roboto', sans-serif;
-                    background-color: #f0f2f5;
-                    margin: 0;
-                    padding: 0;
-                }
-                 header {
-                    background-color: #007bff;
-                    color: #ffffff;
-                    padding: 1rem;
-                    text-align: center;
-                }
-                .header-title {
-                    margin: 0;
-                    font-size: 2rem;
-                    font-weight: 600;
-                }
-                  .header-nav {
-                    margin-top: 0.5rem;
-                }
-                .header-nav a {
-                    color: #fff;
-                    text-decoration: none;
-                    margin: 0 0.5rem;
-                    font-size: 1rem;
-                    transition: color 0.3s ease;
-                }
-                .header-nav a:hover {
-                    color: #d0d0d0;
-                }
-                .container {
-                    max-width: 900px;
-                    margin: 50px auto;
-                    padding: 20px;
-                    background-color: #ffffff;
-                    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-                    border-radius: 10px;
-                }
-                .container h2 {
-                    margin-bottom: 30px;
-                    font-size: 28px;
-                    color: #333;
-                    text-align: center;
-                    border-bottom: 2px solid #007bff;
-                    padding-bottom: 10px;
-                }
-                .contact-card {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: flex-start;
-                    background-color: #f7f9fc;
-                    margin-bottom: 20px;
-                    padding: 20px;
-                    border-radius: 8px;
-                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-                    transition: transform 0.2s ease;
-                }
-                .contact-card:hover {
-                    transform: translateY(-5px);
-                }
-                .contact-details {
-                    max-width: 75%;
-                }
-                .contact-details h3 {
-                    margin-top: 0;
-                    font-size: 22px;
-                    color: #007bff;
-                }
-                .contact-details p {
-                    margin: 5px 0;
-                    font-size: 16px;
-                    color: #555;
-                }
-                .contact-details p strong {
-                    color: #333;
-                }
-                .back-button {
-                    display: inline-block;
-                    margin-top: 20px;
-                    padding: 10px 20px;
-                    background-color: #007bff;
-                    color: #fff;
-                    border: none;
-                    border-radius: 4px;
-                    cursor: pointer;
-                    text-decoration: none;
-                    font-size: 16px;
-                    transition: background-color 0.3s ease;
-                }
-                .back-button:hover {
-                    background-color: #0056b3;
-                }
-                .contact-icon {
-                    font-size: 24px;
-                    color: #007bff;
-                    margin-right: 15px;
-                }
-                .contact-details p .contact-icon {
-                    font-size: 18px;
-                }
-                .schedule-button {
-                    display: inline-block;
-                    margin-top: 10px;
-                    padding: 10px 20px;
-                    background-color: #28a745;
-                    color: #fff;
-                    border: none;
-                    border-radius: 4px;
-                    cursor: pointer;
-                    text-decoration: none;
-                    font-size: 16px;
-                    transition: background-color 0.3s ease;
-                }
-                .schedule-button:hover {
-                    background-color: #218838;
-                }
-            </style>
-        </head>
-        <header>
-                <h1 class="header-title">Tienda Electric</h1>
-                <nav class="header-nav">
-                    <a href="{{ url_for('index') }}">Menú</a>
-                 
-          </nav>
-            </header>
-        <body>
-            <div class="container">
-                <h2>Lista de Interesados</h2>
-
-                {% for contact in contacts %}
-                <div class="contact-card">
-                    <div class="contact-details">
-                        <h3>{{ contact.name }}</h3>
-                        <p><strong><span class="contact-icon">📞</span>Teléfono:</strong> {{ contact.phone }}</p>
-                        <p><strong><span class="contact-icon">📧</span>Email:</strong> {{ contact.email }}</p>
-                        <p><strong><span class="contact-icon">💬</span>Mensaje:</strong> {{ contact.message }}</p>
-                       
-                        <p><strong><span class="contact-icon">📅</span>Fechas Disponibles:</strong>
-                        {% if contact.available_dates %}
-                            <ul>
-                                {% for date in contact.available_dates %}
-                                    <li>{{ date }}</li>
-                                {% endfor %}
-                            </ul>
-                        {% else %}
-                            No disponible
-                        {% endif %}
-                        </p>
-                        <a href="{{ url_for('schedule_appointment', contact_id=contact.id_str) }}" class="schedule-button">Programar Cita</a>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </body>
-        </html>
-    ''', contacts=contacts)
+    return render_template('view_interested.html', contacts=contacts)
 
 @app.route('/schedule/<contact_id>', methods=['GET', 'POST'])
 def schedule_appointment(contact_id):
@@ -860,113 +235,7 @@ def schedule_appointment(contact_id):
 
     db_connection.close()
 
-    return render_template_string('''
-        <html lang="es">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Programar Cita</title>
-             
-            <style>
-                body {
-                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                    margin: 0;
-                    padding: 0;
-                    background-color: #f0f2f5;
-                    color: #333;
-                }
-                header {
-                    background-color: #0044cc;
-                    color: #fff;
-                    padding: 1rem 0;
-                    text-align: center;
-                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-                }
-                .container {
-                    width: 90%;
-                    max-width: 1200px;
-                    margin: 0 auto;
-                }
-                .schedule-form {
-                    background: #fff;
-                    margin: 2rem 0;
-                    padding: 2rem;
-                    border-radius: 10px;
-                    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-                }
-                .schedule-form h2 {
-                    margin-top: 0;
-                    font-size: 1.5rem;
-                    color: #0044cc;
-                }
-                .schedule-form label {
-                    display: block;
-                    margin-bottom: 0.5rem;
-                    font-size: 1rem;
-                    color: #666;
-                }
-                .schedule-form select, .schedule-form input {
-                    width: 100%;
-                    padding: 12px;
-                    margin: 5px 0 10px 0;
-                    border: 1px solid #ddd;
-                    border-radius: 8px;
-                    font-size: 1rem;
-                    color: #333;
-                }
-                .schedule-form button {
-                    display: block;
-                    width: 100%;
-                    padding: 12px;
-                    font-size: 1rem;
-                    color: #fff;
-                    background-color: #0044cc;
-                    border: none;
-                    border-radius: 8px;
-                    cursor: pointer;
-                    transition: background-color 0.3s, transform 0.2s;
-                }
-                .schedule-form button:hover {
-                    background-color: #0033a0;
-                    transform: translateY(-2px);
-                }
-                .schedule-form button:active {
-                    transform: translateY(0);
-                }
-                .schedule-form select:focus, .schedule-form input:focus {
-                    border-color: #0044cc;
-                    outline: none;
-                }
-            </style>
-        </head>
-        <body>
-            <header>
-                <div class="container">
-                    <h1>Programar Cita</h1>
-                    
-                </div>
-            </header>
-            <div class="container">
-                <div class="schedule-form">
-                    <h2>Seleccione una Fecha</h2>
-                    <form method="POST">
-                        <label for="selected_date">Fecha:</label>
-                        <select name="selected_date" id="selected_date" required>
-                            {% if available_dates %}
-                                {% for date in available_dates %}
-                                    <option value="{{ date }}">{{ date }}</option>
-                                {% endfor %}
-                            {% else %}
-                                <option value="">No hay fechas disponibles</option>
-                            {% endif %}
-                        </select>
-                        <button type="submit">Confirmar Cita</button>
-                    </form>
-                </div>
-            </div>
-        </body>
-        </html>
-    ''', contact=contact, available_dates=available_dates)
+    return render_template('schedule_appointment.html', contact=contact, available_dates=available_dates)
 
 @app.route('/confirmed_appointments')
 def confirmed_appointments():
@@ -1004,125 +273,7 @@ def confirmed_appointments():
     db_connection.close()
 
     # Renderizar la plantilla con los detalles de las citas
-    return render_template_string('''
-        <html lang="es">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Citas Confirmadas</title>
-            <style>
-                body {
-                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                    background-color: #f8f9fa;
-                    margin: 0;
-                    padding: 0;
-                }
-                header {
-                    background-color: #007bff;
-                    color: #ffffff;
-                    padding: 1rem;
-                    text-align: center;
-                }
-                .header-title {
-                    margin: 0;
-                    font-size: 2rem;
-                    font-weight: 600;
-                }
-                  .header-nav {
-                    margin-top: 0.5rem;
-                }
-                .header-nav a {
-                    color: #fff;
-                    text-decoration: none;
-                    margin: 0 0.5rem;
-                    font-size: 1rem;
-                    transition: color 0.3s ease;
-                }
-                .header-nav a:hover {
-                    color: #d0d0d0;
-                }
-                .container {
-                    width: 90%;
-                    max-width: 1200px;
-                    margin: 2rem auto;
-                    padding: 1.5rem;
-                    background-color: #ffffff;
-                    border-radius: 8px;
-                    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-                }
-                table {
-                    width: 100%;
-                    border-collapse: separate;
-                    border-spacing: 0;
-                    margin: 1rem 0;
-                }
-                th, td {
-                    padding: 1rem;
-                    text-align: left;
-                    border-bottom: 1px solid #dee2e6;
-                }
-                th {
-                    background-color: #007bff;
-                    color: #ffffff;
-                    font-weight: bold;
-                }
-                tr:nth-child(even) {
-                    background-color: #f2f2f2;
-                }
-                tr:hover {
-                    background-color: #e9ecef;
-                }
-                caption {
-                    padding: 0.5rem;
-                    font-size: 1.25rem;
-                    font-weight: bold;
-                    color: #343a40;
-                }
-            </style>
-        </head>
-        <body>
-            <header>
-                <h1 class="header-title">Tienda Electric</h1>
-                <nav class="header-nav">
-                    <a href="{{ url_for('index') }}">Menú</a>
-                </nav>
-            </header>
-            <div class="container">
-                <table>
-                    <caption>Citas Confirmadas</caption>
-                    <thead>
-                        <tr>
-                            <th>Nombre de la Propiedad</th>
-                            <th>Nombre del Agente</th>
-                            <th>Nombre del Contacto</th>
-                            <th>Teléfono del Contacto</th>
-                            <th>Email del Contacto</th>
-                            <th>Fecha Elegida</th>
-                            <th>Estado</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for appointment in appointments %}
-                        <tr>
-                            <td>{{ appointment.property_name }}</td>
-                            <td>{{ appointment.agent_name }}</td>
-                            <td>{{ appointment.contact_name }}</td>
-                            <td>{{ appointment.contact_phone }}</td>
-                            <td>{{ appointment.contact_email }}</td>
-                            <td>{{ appointment.selected_date }}</td>
-                            <td>{{ appointment.status }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </body>
-        </html>
-    ''', appointments=appointments_details)
-
-
-
-
+    return render_template('confirmed_appointments.html', appointments=appointments_details)
 
 @app.route('/delete_agent/<agent_id>')
 def delete_agent(agent_id):
@@ -1144,8 +295,8 @@ def delete_agent(agent_id):
         users_collection.delete_one({"_id": ObjectId(agent['id_user'])})
 
     db_connection.close()
-
     return redirect(url_for('view_agents'))
+
 
 @app.route('/edit_agent/<agent_id>', methods=['GET', 'POST'])
 def edit_agent(agent_id):
@@ -1184,180 +335,20 @@ def edit_agent(agent_id):
     user = users_collection.find_one({"_id": ObjectId(agent['id_user'])})
     db_connection.close()
 
-    return render_template_string('''
-        <html lang="es">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Editar Agente</title>
-            <style>
-                body {
-                    font-family: Arial, sans-serif;
-                    background-color: #f4f4f4;
-                    margin: 0;
-                    padding: 0;
-                }
-
-                .container {
-                    max-width: 800px;
-                    margin: 20px auto;
-                    padding: 20px;
-                    background: #fff;
-                    border-radius: 8px;
-                    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-                }
-
-                h2 {
-                    color: #333;
-                    margin-bottom: 20px;
-                    text-align: center;
-                }
-
-                form {
-                    display: flex;
-                    flex-direction: column;
-                }
-
-                .form-group {
-                    margin-bottom: 15px;
-                }
-
-                .form-group label {
-                    display: block;
-                    font-weight: bold;
-                    margin-bottom: 5px;
-                    color: #555;
-                }
-
-                .form-group input[type="text"],
-                .form-group input[type="email"],
-                .form-group input[type="password"],
-                .form-group input[type="date"] {
-                    width: 100%;
-                    padding: 10px;
-                    border: 1px solid #ddd;
-                    border-radius: 4px;
-                    box-sizing: border-box;
-                }
-
-                .form-group input[type="submit"] {
-                    background-color: #28a745;
-                    color: #fff;
-                    border: none;
-                    padding: 10px 15px;
-                    border-radius: 4px;
-                    cursor: pointer;
-                    font-size: 16px;
-                    transition: background-color 0.3s;
-                }
-
-                .form-group input[type="submit"]:hover {
-                    background-color: #218838;
-                }
-
-                input[type="hidden"] {
-                    display: none;
-                }
-
-                a {
-                    text-decoration: none;
-                    color: #007bff;
-                }
-
-                a:hover {
-                    text-decoration: underline;
-                }
-
-                /* Estilos para el botón de actualización */
-                .form-group input[type="submit"] {
-                    background-color: #007bff;
-                    color: #fff;
-                    border: none;
-                    padding: 12px 24px;
-                    border-radius: 8px;
-                    cursor: pointer;
-                    font-size: 18px;
-                    font-weight: bold;
-                    text-transform: uppercase;
-                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-                    transition: all 0.3s ease;
-                    margin-top: 20px;
-                }
-
-                .form-group input[type="submit"]:hover {
-                    background-color: #0056b3;
-                    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-                    transform: translateY(-2px);
-                }
-
-                .form-group input[type="submit"]:active {
-                    background-color: #004085;
-                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-                    transform: translateY(0);
-                }
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <h2>Editar Agente</h2>
-                <form action="{{ url_for('edit_agent', agent_id=agent._id) }}" method="post">
-                    <div class="form-group">
-                        <label for="name">Nombre:</label>
-                        <input type="text" id="name" name="name" value="{{ agent.name }}" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="salary">Salario:</label>
-                        <input type="text" id="salary" name="salary" value="{{ agent.salary }}" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="experience">Experiencia:</label>
-                        <input type="text" id="experience" name="experience" value="{{ agent.experience }}" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="hire_date">Fecha de Contratación:</label>
-                        <input type="text" id="hire_date" name="hire_date" value="{{ agent.hire_date }}" required>
-                    </div>
-                    <input type="hidden" name="user_id" value="{{ user._id }}">
-                    <div class="form-group">
-                        <label for="user_name">Nombre de Usuario:</label>
-                        <input type="text" id="user_name" name="user_name" value="{{ user.name }}" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="identification">Identificación:</label>
-                        <input type="text" id="identification" name="identification" value="{{ user.identification }}" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="email">Correo Electrónico:</label>
-                        <input type="email" id="email" name="email" value="{{ user.email }}" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="password">Contraseña:</label>
-                        <input type="text" id="password" name="password" value="{{ user.password }}" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="birth_date">Fecha de Nacimiento:</label>
-                        <input type="text" id="birth_date" name="birth_date" value="{{ user.birth_date }}" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="phone">Teléfono:</label>
-                        <input type="text" id="phone" name="phone" value="{{ user.phone }}" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="image">Imagen:</label>
-                        <input type="text" id="image" name="image" value="{{ user.image }}" required>
-                    </div>
-                    <div class="form-group">
-                        <input type="submit" value="Actualizar">
-                    </div>
-                </form>
-            </div>
-        </body>
-        </html>
-    ''', agent=agent, user=user)
+    return render_template('edit_agent.html', agent=agent, user=user)
 
 
-if __name__ == '__main__':
-    app.run(debug=True)
+@app.route('/properties')
+def properties():
+    db_connection = MongoDBConnection()
+    properties_collection = db_connection.get_collection('Properties')
+    properties = properties_collection.find()
+    
+    # Convertir el cursor a una lista de diccionarios
+    properties_list = list(properties)
+    
+    db_connection.close()
+    return render_template('properties.html', properties=properties_list)
 
 @app.route('/add_property', methods=['GET', 'POST'])
 def add_property():
@@ -1425,6 +416,9 @@ def add_property():
             'pool': pool
         }).inserted_id
 
+        # Obtener el ID del usuario actual
+        user_id = session.get('user_id')  # Asegúrate de que el user_id esté almacenado en la sesión
+
         # Guardar propiedad
         property_collection.insert_one({
             'name': name,
@@ -1434,8 +428,9 @@ def add_property():
             'owner': owner,
             'id_characteristics': characteristics_id,
             'id_address': address_id,
-            'images': image_urls,  # Guardar imágenes como array de binarios
-            'agent_id': agent_id  # Guardar agent_id como ObjectId
+            'images': image_data,  # Guardar imágenes como array de binarios
+            'agent_id': agent_id,  # Guardar agent_id como ObjectId
+            'user_id': ObjectId(user_id)  # Guardar user_id como ObjectId
         })
 
         db_connection.close()
@@ -1444,164 +439,31 @@ def add_property():
     # Obtener lista de agentes
     agents = list(agent_collection.find({}))
 
-    html = """
-    <!DOCTYPE html>
-    <html lang="es">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Agregar Propiedad</title>
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                margin: 0;
-                padding: 0;
-                background-color: #f4f4f4;
-            }
-            header {
-                background-color: #333;
-                color: #fff;
-                padding: 10px 0;
-                text-align: center;
-            }
-            main {
-                padding: 20px;
-                max-width: 600px;
-                margin: 0 auto;
-                background-color: #fff;
-                border-radius: 5px;
-                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            }
-            h1 {
-                margin-bottom: 20px;
-                font-size: 24px;
-            }
-            label {
-                display: block;
-                margin: 10px 0 5px;
-                font-size: 14px;
-            }
-            input[type="text"],
-            input[type="number"],
-            textarea,
-            select {
-                width: 100%;
-                padding: 6px;
-                margin-bottom: 10px;
-                border: 1px solid #ddd;
-                border-radius: 4px;
-                font-size: 14px;
-            }
-            textarea {
-                resize: vertical;
-            }
-            button {
-                background-color: #333;
-                color: #fff;
-                padding: 8px 12px;
-                border: none;
-                border-radius: 4px;
-                cursor: pointer;
-                font-size: 14px;
-            }
-            button:hover {
-                background-color: #555;
-            }
-            h3 {
-                margin-top: 20px;
-                margin-bottom: 10px;
-                font-size: 18px;
-            }
-        </style>
-    </head>
-    <body>
-        <header>
-            <h1>Agregar Nueva Propiedad</h1>
-        </header>
-        <main>
-            <form method="POST">
-                <label for="name">Nombre de la Propiedad:</label>
-                <input type="text" id="name" name="name" required>
-
-                <label for="price">Precio:</label>
-                <input type="text" id="price" name="price" required>
-
-                <label for="transaction_type">Tipo de Transacción:</label>
-                <input type="text" id="transaction_type" name="transaction_type" required>
-
-                <label for="antiquity">Años de Antigüedad:</label>
-                <input type="text" id="antiquity" name="antiquity" required>
-
-                <label for="owner">Propietario:</label>
-                <input type="text" id="owner" name="owner" required>
-                
-                <h3>Agente</h3>
-                <label for="agent_id">Seleccionar Agente:</label>
-                <select id="agent_id" name="agent_id" required>
-                    {% for agent in agents %}
-                    <option value="{{ agent['_id'] }}">{{ agent['name'] }}</option>
-                    {% endfor %}
-                </select>
-
-                <h3>Características</h3>
-                <label for="number_rooms">Número de Habitaciones:</label>
-                <input type="number" id="number_rooms" name="number_rooms" required>
-
-                <label for="number_bathrooms">Número de Baños:</label>
-                <input type="number" id="number_bathrooms" name="number_bathrooms" required>
-
-                <label for="description">Descripción:</label>
-                <textarea id="description" name="description" rows="3" required></textarea>
-
-                <label for="garage">¿Tiene Garage?</label>
-                <select id="garage" name="garage" required>
-                    <option value="Sí">Sí</option>
-                    <option value="No">No</option>
-                </select>
-
-                <label for="pool">¿Tiene Piscina?</label>
-                <select id="pool" name="pool" required>
-                    <option value="Sí">Sí</option>
-                    <option value="No">No</option>
-                </select>
-
-                <h3>Dirección</h3>
-                <label for="street">Calle:</label>
-                <input type="text" id="street" name="street" required>
-
-                <label for="province">Provincia:</label>
-                <input type="text" id="province" name="province" required>
-
-                <label for="canton">Cantón:</label>
-                <input type="text" id="canton" name="canton" required>
-
-                <label for="others_signs">Otros Señales:</label>
-                <input type="text" id="others_signs" name="others_signs">
-
-                <h3>Imágenes</h3>
-                <label for="image_url">URL de Imagen (puedes agregar varias):</label>
-                <input type="text" id="image_url" name="image_url" placeholder="https://ejemplo.com/imagen.jpg">
-
-                <button type="submit">Agregar Propiedad</button>
-            </form>
-        </main>
-    </body>
-    </html>
-    """
-    return render_template_string(html, agents=agents)
+    return render_template('add_property.html', agents=agents)
 
 @app.route('/edit_property/<property_id>', methods=['GET', 'POST'])
 def edit_property(property_id):
     db_connection = MongoDBConnection()
     property_collection = db_connection.get_collection('Property')
 
+    property = property_collection.find_one({'_id': ObjectId(property_id)})
+    
+    if not property:
+        db_connection.close()
+        return "Propiedad no encontrada", 404
+    
+    # Verificar que el usuario tenga permiso para editar
+    if 'user_id' in session:
+        user_id = session['user_id']
+        if property.get('agent_id') != ObjectId(user_id):
+            db_connection.close()
+            return "No tienes permiso para editar esta propiedad", 403
+    
     if request.method == 'POST':
         try:
-            # Obtener las imágenes actuales y nuevas imágenes
             images = request.form.getlist('existing_images')
             new_image_url = request.form.get('new_image')
 
-            # Agregar la nueva imagen si se proporcionó una URL
             if new_image_url:
                 images.append(new_image_url)
 
@@ -1616,176 +478,41 @@ def edit_property(property_id):
 
             property_collection.update_one({'_id': ObjectId(property_id)}, {'$set': updated_property})
             db_connection.close()
-            return redirect(url_for('index'))
+            return redirect(url_for('properties'))
 
         except Exception as e:
             db_connection.close()
             return f"Error en la operación de MongoDB: {e}"
 
-    property = property_collection.find_one({'_id': ObjectId(property_id)})
     db_connection.close()
-
-    if property:
-        html = """
-        <!DOCTYPE html>
-        <html lang="es">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Editar Propiedad</title>
-            <style>
-                body {
-                    font-family: Arial, sans-serif;
-                    margin: 0;
-                    padding: 0;
-                    background-color: #f4f4f4;
-                }
-                header {
-                    background-color: #007BFF;
-                    color: #fff;
-                    padding: 1rem 0;
-                    text-align: center;
-                }
-                .container {
-                    width: 80%;
-                    margin: 0 auto;
-                    overflow: hidden;
-                }
-                form {
-                    background: #fff;
-                    padding: 1rem;
-                    border-radius: 8px;
-                    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-                    display: flex;
-                    flex-direction: column;
-                }
-                label {
-                    margin: 0.5rem 0;
-                }
-                input[type="text"],
-                input[type="number"],
-                input[type="file"],
-                input[type="submit"] {
-                    padding: 0.5rem;
-                    border: 1px solid #ddd;
-                    border-radius: 5px;
-                    margin: 0.5rem 0;
-                    font-size: 1rem;
-                }
-                input[type="submit"] {
-                    background-color: #007BFF;
-                    color: #fff;
-                    border: none;
-                    cursor: pointer;
-                }
-                input[type="submit"]:hover {
-                    background-color: #0056b3;
-                }
-                .property-images {
-                    display: flex;
-                    flex-wrap: wrap;
-                    gap: 10px;
-                }
-                .property-images img {
-                    width: 100px;
-                    height: 75px;
-                    object-fit: cover;
-                    border-radius: 8px;
-                }
-                .property-images .remove-image {
-                    background: #ff0000;
-                    color: #fff;
-                    border: none;
-                    padding: 0.3rem 0.5rem;
-                    border-radius: 5px;
-                    cursor: pointer;
-                    margin-left: 10px;
-                }
-                footer {
-                    background-color: #333;
-                    color: #fff;
-                    text-align: center;
-                    padding: 1rem 0;
-                    position: fixed;
-                    bottom: 0;
-                    width: 100%;
-                }
-            </style>
-        </head>
-        <body>
-            <header>
-                <div class="container">
-                    <h1>Editar Propiedad</h1>
-                </div>
-            </header>
-            <div class="container">
-                <form action="{{ url_for('edit_property', property_id=property_id) }}" method="POST" enctype="multipart/form-data">
-                    <label for="name">Nombre:</label>
-                    <input type="text" id="name" name="name" value="{{ property['name'] }}" required>
-                    
-                    <label for="price">Precio:</label>
-                    <input type="number" id="price" name="price" step="0.01" value="{{ property['price'] }}" required>
-                    
-                    <label for="transaction_type">Tipo de Transacción:</label>
-                    <input type="text" id="transaction_type" name="transaction_type" value="{{ property['transaction_type'] }}" required>
-                    
-                    <label for="antiquity">Años de Antigüedad:</label>
-                    <input type="number" id="antiquity" name="antiquity" value="{{ property['antiquity'] }}" required>
-                    
-                    <label for="owner">Propietario:</label>
-                    <input type="text" id="owner" name="owner" value="{{ property['owner'] }}" required>
-
-                    <label>Imágenes actuales:</label>
-                    <div class="property-images">
-                        {% for image in property['images'] %}
-                        <div>
-                            <img src="{{ image }}" alt="Imagen de la propiedad">
-                            <button type="button" class="remove-image" onclick="removeImage('{{ image }}')">Eliminar</button>
-                            <input type="hidden" name="existing_images" value="{{ image }}">
-                        </div>
-                        {% endfor %}
-                    </div>
-
-                    <label for="new_image">Nueva Imagen (URL):</label>
-                    <input type="text" id="new_image" name="new_image">
-
-                    <input type="submit" value="Guardar Cambios">
-                </form>
-            </div>
-            <script>
-                function removeImage(imageUrl) {
-                    const inputs = document.querySelectorAll(`input[value='${imageUrl}']`);
-                    inputs.forEach(input => input.remove());
-                    const images = document.querySelectorAll(`img[src='${imageUrl}']`);
-                    images.forEach(image => image.remove());
-                    const buttons = document.querySelectorAll(`button[onclick="removeImage('${imageUrl}')"]`);
-                    buttons.forEach(button => button.remove());
-                }
-            </script>
-        </body>
-        </html>
-        """
-        return render_template_string(html, property=property, property_id=property_id)
-    else:
-        return "Propiedad no encontrada", 404
-
-
+    return render_template('edit_property.html', property=property)
 
 @app.route('/delete_property/<property_id>')
 def delete_property(property_id):
-    try:
-        db_connection = MongoDBConnection()
-        property_collection = db_connection.get_collection('Property')
+    db_connection = MongoDBConnection()
+    property_collection = db_connection.get_collection('Property')
 
+    property = property_collection.find_one({'_id': ObjectId(property_id)})
+
+    if not property:
+        db_connection.close()
+        return "Propiedad no encontrada", 404
+
+    # Verificar que el usuario tenga permiso para eliminar
+    if 'user_id' in session:
+        user_id = session['user_id']
+        if property.get('id_agent') != ObjectId(user_id):
+            db_connection.close()
+            return "No tienes permiso para eliminar esta propiedad", 403
+
+    try:
         property_collection.delete_one({'_id': ObjectId(property_id)})
         db_connection.close()
-        return redirect(url_for('index'))
+        return redirect(url_for('properties'))
 
     except Exception as e:
+        db_connection.close()
         return f"Error en la operación de MongoDB: {e}"
-    
-    
-  
 
 if __name__ == '__main__':
     app.run(debug=True)

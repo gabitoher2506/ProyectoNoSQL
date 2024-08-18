@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Lista de Interesados{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Lista de Interesados</h2>
+
+    {% for contact in contacts %}
+    <div class="contact-card">
+        <div class="contact-details">
+            <h3>{{ contact.name }}</h3>
+            <p><strong><span class="contact-icon">📞</span>Teléfono:</strong> {{ contact.phone }}</p>
+            <p><strong><span class="contact-icon">📧</span>Email:</strong> {{ contact.email }}</p>
+            <p><strong><span class="contact-icon">💬</span>Mensaje:</strong> {{ contact.message }}</p>
+            
+            <p><strong><span class="contact-icon">📅</span>Fechas Disponibles:</strong>
+            {% if contact.available_dates %}
+                <ul>
+                    {% for date in contact.available_dates %}
+                        <li>{{ date }}</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                No disponible
+            {% endif %}
+            </p>
+            <a href="{{ url_for('schedule_appointment', contact_id=contact.id_str) }}" class="schedule-button">Programar Cita</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

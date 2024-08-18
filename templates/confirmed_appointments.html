@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Citas Confirmadas{% endblock %}
+
+{% block content %}
+<div class="container">
+    <table>
+        <caption>Citas Confirmadas</caption>
+        <thead>
+            <tr>
+                <th>Nombre de la Propiedad</th>
+                <th>Nombre del Agente</th>
+                <th>Nombre del Contacto</th>
+                <th>Teléfono del Contacto</th>
+                <th>Email del Contacto</th>
+                <th>Fecha Elegida</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for appointment in appointments %}
+            <tr>
+                <td>{{ appointment.property_name }}</td>
+                <td>{{ appointment.agent_name }}</td>
+                <td>{{ appointment.contact_name }}</td>
+                <td>{{ appointment.contact_phone }}</td>
+                <td>{{ appointment.contact_email }}</td>
+                <td>{{ appointment.selected_date }}</td>
+                <td>{{ appointment.status }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

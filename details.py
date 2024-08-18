@@ -213,3 +213,4 @@ def details(property_id):
 
     except Exception as e:
         return f"Error en la operación de MongoDB: {e}"
+    

@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Propiedad{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Editar Propiedad</h1>
+    <form action="{{ url_for('edit_property', property_id=property_id) }}" method="POST" enctype="multipart/form-data">
+        <label for="name">Nombre:</label>
+        <input type="text" id="name" name="name" value="{{ property['name'] }}" required>
+        
+        <label for="price">Precio:</label>
+        <input type="number" id="price" name="price" step="0.01" value="{{ property['price'] }}" required>
+        
+        <label for="transaction_type">Tipo de Transacción:</label>
+        <input type="text" id="transaction_type" name="transaction_type" value="{{ property['transaction_type'] }}" required>
+        
+        <label for="antiquity">Años de Antigüedad:</label>
+        <input type="number" id="antiquity" name="antiquity" value="{{ property['antiquity'] }}" required>
+        
+        <label for="owner">Propietario:</label>
+        <input type="text" id="owner" name="owner" value="{{ property['owner'] }}" required>
+
+        <label>Imágenes actuales:</label>
+        <div class="property-images">
+            {% for image in property['images'] %}
+            <div>
+                <img src="{{ image }}" alt="Imagen de la propiedad">
+                <button type="button" class="remove-image" onclick="removeImage('{{ image }}')">Eliminar</button>
+                <input type="hidden" name="existing_images" value="{{ image }}">
+            </div>
+            {% endfor %}
+        </div>
+
+        <label for="new_image">Nueva Imagen (URL):</label>
+        <input type="text" id="new_image" name="new_image">
+
+        <input type="submit" value="Guardar Cambios">
+    </form>
+</div>
+<script>
+    function removeImage(imageUrl) {
+        const inputs = document.querySelectorAll(`input[value='${imageUrl}']`);
+        inputs.forEach(input => input.remove());
+        const images = document.querySelectorAll(`img[src='${imageUrl}']`);
+        images.forEach(image => image.remove());
+        const buttons = document.querySelectorAll(`button[onclick="removeImage('${imageUrl}')"]`);
+        buttons.forEach(button => button.remove());
+    }
+</script>
+{% endblock %}

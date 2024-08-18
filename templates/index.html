@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Bienes Raíces{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="featured-properties-title">Propiedades Destacadas</h2>
+    <div class="properties">
+        {% for property in properties %}
+        <div class="property-card">
+            <div class="property-info">
+                <h3 class="property-name">{{ property.name }}</h3>
+                <p class="property-price"><strong>Precio:</strong> ${{ property.price }}</p>
+                <p class="property-transaction-type"><strong>Tipo de Transacción:</strong> {{ property.transaction_type }}</p>
+                <p class="property-antiquity"><strong>Años de Antigüedad:</strong> {{ property.antiquity }}</p>
+                <p class="property-owner"><strong>Propietario:</strong> {{ property.owner }}</p>
+                <div class="property-images-carousel">
+                    <div id="carousel-{{ property.id }}" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-inner">
+                            {% for image in property.images %}
+                            <div class="carousel-item {% if loop.first %}active{% endif %}">
+                                <img src="{{ image }}" class="property-image d-block w-100" alt="Imagen de la propiedad">
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <div class="property-buttons">
+                    <a href="{{ url_for('details', property_id=property.id) }}" class="button details-button">Detalles</a>
+                    <a href="{{ url_for('edit_property', property_id=property.id) }}" class="button edit-button">Editar</a>
+                    <a href="{{ url_for('delete_property', property_id=property.id) }}" class="button delete-button">Eliminar</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

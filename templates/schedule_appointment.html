@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Programar Cita{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Programar Cita</h1>
+</div>
+<div class="container">
+    <div class="schedule-form">
+        <h2>Seleccione una Fecha</h2>
+        <form method="POST">
+            <label for="selected_date">Fecha:</label>
+            <select name="selected_date" id="selected_date" required>
+                {% if available_dates %}
+                    {% for date in available_dates %}
+                        <option value="{{ date }}">{{ date }}</option>
+                    {% endfor %}
+                {% else %}
+                    <option value="">No hay fechas disponibles</option>
+                {% endif %}
+            </select>
+            <button type="submit">Confirmar Cita</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
