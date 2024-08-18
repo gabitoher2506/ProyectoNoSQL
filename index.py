@@ -440,25 +440,34 @@ def add_property():
     agents = list(agent_collection.find({}))
 
     return render_template('add_property.html', agents=agents)
-
 @app.route('/edit_property/<property_id>', methods=['GET', 'POST'])
 def edit_property(property_id):
     db_connection = MongoDBConnection()
     property_collection = db_connection.get_collection('Property')
+    agent_collection = db_connection.get_collection('Agent')
 
     property = property_collection.find_one({'_id': ObjectId(property_id)})
-    
+
     if not property:
         db_connection.close()
         return "Propiedad no encontrada", 404
-    
+
     # Verificar que el usuario tenga permiso para editar
     if 'user_id' in session:
         user_id = session['user_id']
-        if property.get('agent_id') != ObjectId(user_id):
+        
+        # Obtener el agente asociado a la propiedad
+        agent = agent_collection.find_one({'_id': property.get('agent_id')})
+        
+        if not agent:
+            db_connection.close()
+            return "Agente no encontrado", 404
+        
+        # Verificar si el usuario es el agente asociado
+        if agent.get('id_user') != ObjectId(user_id):
             db_connection.close()
             return "No tienes permiso para editar esta propiedad", 403
-    
+
     if request.method == 'POST':
         try:
             images = request.form.getlist('existing_images')
@@ -486,11 +495,11 @@ def edit_property(property_id):
 
     db_connection.close()
     return render_template('edit_property.html', property=property)
-
 @app.route('/delete_property/<property_id>')
 def delete_property(property_id):
     db_connection = MongoDBConnection()
     property_collection = db_connection.get_collection('Property')
+    agent_collection = db_connection.get_collection('Agent')
 
     property = property_collection.find_one({'_id': ObjectId(property_id)})
 
@@ -501,7 +510,16 @@ def delete_property(property_id):
     # Verificar que el usuario tenga permiso para eliminar
     if 'user_id' in session:
         user_id = session['user_id']
-        if property.get('id_agent') != ObjectId(user_id):
+        
+        # Obtener el agente asociado a la propiedad
+        agent = agent_collection.find_one({'_id': property.get('agent_id')})
+        
+        if not agent:
+            db_connection.close()
+            return "Agente no encontrado", 404
+        
+        # Verificar si el usuario es el agente asociado
+        if agent.get('id_user') != ObjectId(user_id):
             db_connection.close()
             return "No tienes permiso para eliminar esta propiedad", 403
 
@@ -513,6 +531,7 @@ def delete_property(property_id):
     except Exception as e:
         db_connection.close()
         return f"Error en la operación de MongoDB: {e}"
+
 
 if __name__ == '__main__':
     app.run(debug=True)
