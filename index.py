@@ -480,7 +480,6 @@ def add_property():
             'id_address': address_id,
             'images': image_data,  # Guardar imágenes como array de binarios
             'agent_id': agent_id,  # Guardar agent_id como ObjectId
-            'user_id': ObjectId(user_id)  # Guardar user_id como ObjectId
         })
 
         db_connection.close()
@@ -506,15 +505,12 @@ def edit_property(property_id):
         return "Propiedad no encontrada", 404
 
     user_id = session['user_id']
-
-    # Obtener el agente asociado a la propiedad
     agent = agent_collection.find_one({'_id': property.get('agent_id')})
-    
+
     if not agent:
         db_connection.close()
         return "Agente no encontrado", 404
     
-    # Verificar si el usuario es el agente asociado
     if agent.get('id_user') != ObjectId(user_id):
         db_connection.close()
         return "No tienes permiso para editar esta propiedad", 403
@@ -538,14 +534,16 @@ def edit_property(property_id):
 
             property_collection.update_one({'_id': ObjectId(property_id)}, {'$set': updated_property})
             db_connection.close()
-            return redirect(url_for('properties'))
+            return redirect(url_for('index'))
 
         except Exception as e:
             db_connection.close()
             return f"Error en la operación de MongoDB: {e}"
 
     db_connection.close()
-    return render_template('edit_property.html', property=property)
+    return render_template('edit_property.html', property=property, property_id=property_id)
+
+
 @app.route('/delete_property/<property_id>')
 def delete_property(property_id):
     if 'user_id' not in session:
