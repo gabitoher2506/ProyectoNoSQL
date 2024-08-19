@@ -130,7 +130,7 @@ def add_agent():
         
         # Crear un nuevo documento en la colección Agent
         new_agent = {
-            "id_user": str(user_id),
+            "id_user": ObjectId(user_id),
             "name": request.form['name'],
             "salary": request.form['salary'],  # Suponiendo que se captura el salario en el formulario
             "experience": request.form['experience'],  # Suponiendo que se captura la experiencia en el formulario
