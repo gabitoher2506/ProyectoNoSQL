@@ -433,21 +433,8 @@ def add_property():
         canton = request.form.get('canton')
         others_signs = request.form.get('others_signs')
 
-        # Obtener URL de la imagen
-        image_urls = request.form.getlist('image_url')  # Para manejar múltiples URLs
-        image_data = []
-        for image_url in image_urls:
-            if image_url:
-                try:
-                    # Descargar la imagen desde la URL
-                    response = requests.get(image_url)
-                    if response.status_code == 200:
-                        image_data.append(response.content)
-                    else:
-                        # Manejar el caso en que la imagen no se pueda descargar
-                        print(f"Error al descargar la imagen: {image_url}")
-                except Exception as e:
-                    print(f"Error al descargar la imagen: {e}")
+        # Obtener URLs de las imágenes
+        image_urls = request.form.getlist('image_url')  # Manejar múltiples URLs
 
         # Guardar dirección
         address_id = address_collection.insert_one({
@@ -478,7 +465,7 @@ def add_property():
             'owner': owner,
             'id_characteristics': characteristics_id,
             'id_address': address_id,
-            'images': image_data,  # Guardar imágenes como array de binarios
+            'images': image_urls,  # Guardar URLs de imágenes directamente
             'agent_id': agent_id,  # Guardar agent_id como ObjectId
         })
 
@@ -489,6 +476,7 @@ def add_property():
     agents = list(agent_collection.find({}))
 
     return render_template('add_property.html', agents=agents)
+
 @app.route('/edit_property/<property_id>', methods=['GET', 'POST'])
 def edit_property(property_id):
     if 'user_id' not in session:
