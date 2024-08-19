@@ -338,9 +338,6 @@ def delete_agent(agent_id):
         # Eliminar el agente
         agents_collection.delete_one({"_id": ObjectId(agent_id)})
 
-        # Eliminar el rol relacionado
-        roles_collection.delete_many({"id_user": agent['id_user']})
-
         # Eliminar el usuario relacionado
         users_collection.delete_one({"_id": ObjectId(agent['id_user'])})
 
