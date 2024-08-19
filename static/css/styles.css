@@ -124,13 +124,7 @@ main {
     gap: 1.5rem;
 }
 
-.property-card {
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    overflow: hidden;
-    width: 100%;
-}
+
 
 .property-info {
     padding: 1rem;
@@ -151,8 +145,9 @@ main {
 }
 
 .property-image {
-    width: 100%;
-    height: auto;
+    width: 54%;
+    height: 200px;
+    object-fit: cover;
     border-radius: 4px;
 }
 
@@ -183,23 +178,64 @@ main {
     transform: scale(0.95);
 }
 
-/* Carousel */
-.carousel {
-    position: relative;
+/* Property Card - Images */
+.property-card {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    overflow: hidden;
+    width: 100%;
+    transition: transform 0.3s, box-shadow 0.3s;
 }
 
+.property-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.property-images-carousel {
+    margin: 1rem 0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.property-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    transition: transform 0.3s, filter 0.3s;
+    border-radius: 8px;
+}
+
+.property-image:hover {
+    transform: scale(1.05);
+    filter: brightness(0.9);
+}
+
+/* Carousel */
 .carousel-inner img {
     width: 100%;
     height: auto;
-    border-radius: 4px;
+    border-radius: 54px;
+    object-fit: cover;
+    transition: transform 0.3s, filter 0.3s;
 }
 
+.carousel-inner img:hover {
+    transform: scale(1.05);
+    filter: brightness(0.9);
+}
+
+/* Carousel Controls */
 .carousel-control-prev, .carousel-control-next {
     width: 5%;
+    background-color: rgba(0, 123, 255, 0.5);
+    border-radius: 50%;
+    padding: 10px;
 }
 
 .carousel-control-prev-icon, .carousel-control-next-icon {
-    background-color: #007bff;
+    background-color: #fff;
     border-radius: 50%;
 }
 
@@ -267,9 +303,65 @@ main {
 }
 
 .edit-button {
-    background-color: #007bff;
+    background-color: #04b80aeb;
     color: #fff;
 }
+
+.remove-image-btn {
+    background-color: #780000;  
+    color: #fff;  
+    border: none;  
+    border-radius: 5px;  
+    padding: 11px 14px;  
+    font-size: 14px;  
+    cursor: pointer;  
+    transition: background-color 0.3s ease; 
+    position: relative;  
+    display: inline-block;  
+    z-index: 10;  
+}
+
+.remove-image-btn:hover {
+    background-color: #a00000;  /* Fondo más claro al pasar el cursor */
+}
+
+.remove-image-btn:active {
+    background-color: #5c0000;  /* Fondo más oscuro cuando se hace clic */
+}
+
+.remove-image-btn:focus {
+    outline: none;  /* Sin borde al hacer foco */
+    box-shadow: 0 0 0 3px rgba(120, 0, 0, 0.4);  /* Sombra externa */
+}
+
+.submit-btn {
+    background-color: #4CAF50;  /* Verde */
+    color: #fff;  /* Color del texto en blanco */
+    border: none;  /* Sin borde */
+    border-radius: 5px;  /* Bordes redondeados */
+    padding: 12px 20px;  /* Espaciado interno */
+    font-size: 16px;  /* Tamaño de fuente */
+    cursor: pointer;  /* Cursor de puntero al pasar sobre el botón */
+    transition: background-color 0.3s ease, transform 0.2s ease;  /* Transiciones suaves para color y transformación */
+    position: relative;  /* Posicionamiento relativo */
+    display: inline-block;  /* Asegura que el botón se muestre como un bloque en línea */
+}
+
+.submit-btn:hover {
+    background-color: #45a049;  /* Fondo más oscuro al pasar el cursor */
+    transform: scale(1.05);  /* Escala ligeramente el botón al pasar el cursor */
+}
+
+.submit-btn:active {
+    background-color: #388e3c;  /* Fondo aún más oscuro cuando se hace clic */
+    transform: scale(0.95);  /* Escala ligeramente hacia abajo cuando se hace clic */
+}
+
+.submit-btn:focus {
+    outline: none;  /* Sin borde al hacer foco */
+    box-shadow: 0 0 0 3px rgba(0, 128, 0, 0.4);  /* Sombra externa para enfoque */
+}
+
 
 .edit-button:hover {
     background-color: #0056b3;
@@ -278,6 +370,7 @@ main {
 .delete-button {
     background-color: #dc3545;
     color: #fff;
+    
 }
 
 .delete-button:hover {
