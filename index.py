@@ -122,7 +122,7 @@ def add_agent():
             "email": request.form['email'],
             "phone": request.form['phone'],
             "image": request.form['image'],
-            "role_id": role_id  # Agregar role_id al usuario
+            "role_id": ObjectId(role_id)  # Agregar role_id al usuario
         }
         
         # Insertar el nuevo usuario en la colección Users
@@ -576,7 +576,7 @@ def delete_property(property_id):
     try:
         property_collection.delete_one({'_id': ObjectId(property_id)})
         db_connection.close()
-        return redirect(url_for('properties'))
+        return redirect(url_for('index'))
 
     except Exception as e:
         db_connection.close()
