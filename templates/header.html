@@ -18,13 +18,17 @@
                         {% if session['user_role'] == 'Admin' %}
                             <li class="site-header-nav-item"><a href="{{ url_for('view_agents') }}" class="site-header-nav-link">Ver Agentes</a></li>
                             <li class="site-header-nav-item"><a href="{{ url_for('add_agent') }}" class="site-header-nav-link">Agregar Agentes</a></li>
-                            <li class="site-header-nav-item"><a href="{{ url_for('add_property') }}" class="site-header-nav-link">Agregar Propiedad</a></li>
-                        {% elif session['user_role'] == 'Agente' %}
+                            <li class="site-header-nav-item"><a href="{{ url_for('confirmed_appointments') }}" class="site-header-nav-link">Citas Confirmadas</a></li>
                             <li class="site-header-nav-item"><a href="{{ url_for('view_interested') }}" class="site-header-nav-link">Ver Interesados</a></li>
+
+                        {% elif session['user_role'] == 'Agente' %}
+                            <li class="site-header-nav-item"><a href="{{ url_for('view_interested') }}" class="site-header-nav-link">Ver Interesados</a></li> 
+                            <li class="site-header-nav-item"><a href="{{ url_for('add_property') }}" class="site-header-nav-link">Agregar Propiedad</a></li>
+                            <li class="site-header-nav-item"><a href="{{ url_for('confirmed_appointments') }}" class="site-header-nav-link">Citas Confirmadas</a></li>
                         {% elif session['user_role'] == 'Cliente' %}
                             
                         {% endif %}
-                        <li class="site-header-nav-item"><a href="{{ url_for('confirmed_appointments') }}" class="site-header-nav-link">Citas Confirmadas</a></li>
+                        
                         <li class="site-header-nav-item"><a href="{{ url_for('logout') }}" class="site-header-nav-link">Cerrar Sesión</a></li>
                     {% else %}
                         <li class="site-header-nav-item"><a href="{{ url_for('login') }}" class="site-header-nav-link">Inicio Sesión</a></li>

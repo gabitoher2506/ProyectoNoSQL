@@ -3,72 +3,106 @@
 {% block title %}Agregar Propiedad{% endblock %}
 
 {% block content %}
-<main>
-    <h1>Agregar Nueva Propiedad</h1>
-    <form method="POST">
-        <label for="name">Nombre de la Propiedad:</label>
-        <input type="text" id="name" name="name" required>
+<main class="property-add-container">
+    <h1 class="page-title">Agregar Nueva Propiedad</h1>
+    <form method="POST" class="property-form">
+        <div class="form-group">
+            <label for="name" class="form-label">Nombre de la Propiedad:</label>
+            <input type="text" id="name" name="name" class="form-input" required>
+        </div>
 
-        <label for="price">Precio:</label>
-        <input type="text" id="price" name="price" required>
+        <div class="form-group">
+            <label for="price" class="form-label">Precio:</label>
+            <input type="text" id="price" name="price" class="form-input" required>
+        </div>
 
-        <label for="transaction_type">Tipo de Transacción:</label>
-        <input type="text" id="transaction_type" name="transaction_type" required>
+        <div class="form-group">
+            <label for="transaction_type" class="form-label">Tipo de Transacción:</label>
+            <input type="text" id="transaction_type" name="transaction_type" class="form-input" required>
+        </div>
 
-        <label for="antiquity">Años de Antigüedad:</label>
-        <input type="text" id="antiquity" name="antiquity" required>
+        <div class="form-group">
+            <label for="antiquity" class="form-label">Años de Antigüedad:</label>
+            <input type="text" id="antiquity" name="antiquity" class="form-input" required>
+        </div>
 
-        <label for="owner">Propietario:</label>
-        <input type="text" id="owner" name="owner" required>
+        <div class="form-group">
+            <label for="owner" class="form-label">Propietario:</label>
+            <input type="text" id="owner" name="owner" class="form-input" required>
+        </div>
         
-        <h3>Agente</h3>
-        <label for="agent_id">Seleccionar Agente:</label>
-        <select id="agent_id" name="agent_id" required>
-            {% for agent in agents %}
-            <option value="{{ agent['_id'] }}">{{ agent['name'] }}</option>
-            {% endfor %}
-        </select>
+        <h3 class="section-title">Agente</h3>
+        <div class="form-group">
+            <label for="agent_id" class="form-label">Seleccionar Agente:</label>
+            <select id="agent_id" name="agent_id" class="form-select" required>
+                {% for agent in agents %}
+                <option value="{{ agent['_id'] }}">{{ agent['name'] }}</option>
+                {% endfor %}
+            </select>
+        </div>
 
-        <h3>Características</h3>
-        <label for="number_rooms">Número de Habitaciones:</label>
-        <input type="number" id="number_rooms" name="number_rooms" required>
+        <h3 class="section-title">Características</h3>
+        <div class="form-group">
+            <label for="number_rooms" class="form-label">Número de Habitaciones:</label>
+            <input type="number" id="number_rooms" name="number_rooms" class="form-input" required>
+        </div>
 
-        <label for="number_bathrooms">Número de Baños:</label>
-        <input type="number" id="number_bathrooms" name="number_bathrooms" required>
+        <div class="form-group">
+            <label for="number_bathrooms" class="form-label">Número de Baños:</label>
+            <input type="number" id="number_bathrooms" name="number_bathrooms" class="form-input" required>
+        </div>
 
-        <label for="description">Descripción:</label>
-        <textarea id="description" name="description" rows="3" required></textarea>
+        <div class="form-group">
+            <label for="description" class="form-label">Descripción:</label>
+            <textarea id="description" name="description" class="form-textarea" rows="3" required></textarea>
+        </div>
 
-        <label for="garage">¿Tiene Garage?</label>
-        <select id="garage" name="garage" required>
-            <option value="Sí">Sí</option>
-            <option value="No">No</option>
-        </select>
+        <div class="form-group">
+            <label for="garage" class="form-label">¿Tiene Garage?</label>
+            <select id="garage" name="garage" class="form-select" required>
+                <option value="Sí">Sí</option>
+                <option value="No">No</option>
+            </select>
+        </div>
 
-        <label for="pool">¿Tiene Piscina?</label>
-        <select id="pool" name="pool" required>
-            <option value="Sí">Sí</option>
-            <option value="No">No</option>
-        </select>
+        <div class="form-group">
+            <label for="pool" class="form-label">¿Tiene Piscina?</label>
+            <select id="pool" name="pool" class="form-select" required>
+                <option value="Sí">Sí</option>
+                <option value="No">No</option>
+            </select>
+        </div>
 
-        <h3>Dirección</h3>
-        <label for="street">Calle:</label>
-        <input type="text" id="street" name="street" required>
+        <h3 class="section-title">Dirección</h3>
+        <div class="form-group">
+            <label for="street" class="form-label">Calle:</label>
+            <input type="text" id="street" name="street" class="form-input" required>
+        </div>
 
-        <label for="province">Provincia:</label>
-        <input type="text" id="province" name="province" required>
+        <div class="form-group">
+            <label for="province" class="form-label">Provincia:</label>
+            <input type="text" id="province" name="province" class="form-input" required>
+        </div>
 
-        <label for="canton">Cantón:</label>
-        <input type="text" id="canton" name="canton" required>
+        <div class="form-group">
+            <label for="canton" class="form-label">Cantón:</label>
+            <input type="text" id="canton" name="canton" class="form-input" required>
+        </div>
 
-        <label for="others_signs">Otros Señales:</label>
-        <input type="text" id="others_signs" name="others_signs">
+        <div class="form-group">
+            <label for="others_signs" class="form-label">Otros Señales:</label>
+            <input type="text" id="others_signs" name="others_signs" class="form-input">
+        </div>
 
-        <h3>Imágenes</h3>
-        <label for="image_url">URL de Imagen (puedes agregar varias):</label>
-        <input type="text" id="image_url" name="image_url" placeholder="https://ejemplo.com/imagen.jpg">
+        <h3 class="section-title">Imágenes</h3>
+        <div class="form-group">
+            <label for="image_url" class="form-label">URL de Imagen (puedes agregar varias):</label>
+            <input type="text" id="image_url" name="image_url" class="form-input" placeholder="https://ejemplo.com/imagen.jpg">
+        </div>
 
-        <button type="submit">Agregar Propiedad</button>
+        <div class="form-group">
+            <button type="submit" class="submit-button">Agregar Propiedad</button>
+        </div>
     </form>
 </main>
 {% endblock %}

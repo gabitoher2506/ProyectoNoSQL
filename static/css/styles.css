@@ -1,23 +1,56 @@
-/* Global Styles */
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+html, body {
+    height: 100%;
     margin: 0;
     padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: #333;
     background: #f4f4f4;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-attachment: fixed;
+    background-size: cover;
+    position: relative; /* Asegura que el pseudo-elemento esté posicionado correctamente */
+    min-height: 100vh; /* Asegura que el body tenga al menos el alto del viewport */
 }
 
-/* Container */
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+body::before {
+    content: "";
+    position: fixed; /* Cambiado a fixed para cubrir toda la ventana de visualización */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* Ajusta la opacidad y el color para oscurecer */
+    z-index: -1; /* Coloca el pseudo-elemento detrás del contenido */
 }
 
-header {
+
+body.login-page {
+    background: #f4f4f4;
+    background-image: url('/static/images/fondo.jpg'); 
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-attachment: fixed;
+    background-size: cover;
+}
+
+body.login-page::before {
+    content: "";
+    position: fixed; 
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* Ajusta la opacidad y el color para oscurecer */
+    z-index: -1; 
+}
+
+
+/* Header */
+header, .site-header {
     background-color: #007bff;
     color: #fff;
     padding: 1rem 0;
@@ -29,32 +62,32 @@ header {
     z-index: 1000;
 }
 
-header .container {
-    max-width: 1200px;
-    margin: 0 auto;
+header .container, .site-header-container {
+    width: 100%;
     padding: 0 1rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    box-sizing: border-box;
 }
 
-header h1 {
+header h1, .site-header-title {
     margin: 0;
     font-size: 2rem;
 }
 
-header nav ul {
+header nav ul, .site-header-nav-list {
     list-style: none;
     margin: 0;
     padding: 0;
     display: flex;
 }
 
-header nav ul li {
+header nav ul li, .site-header-nav-item {
     margin: 0 1rem;
 }
 
-header nav ul li a {
+header nav ul li a, .site-header-nav-link {
     color: #fff;
     text-decoration: none;
     font-size: 1rem;
@@ -63,13 +96,13 @@ header nav ul li a {
     transition: background-color 0.3s, color 0.3s;
 }
 
-header nav ul li a:hover {
+header nav ul li a:hover, .site-header-nav-link:hover {
     background-color: #0056b3;
-    color: #fff;
 }
 
+/* Main */
 main {
-    margin-top: 80px; 
+    margin-top: 80px;
     padding: 1rem;
     max-width: 1200px;
     margin: 1rem auto;
@@ -78,6 +111,7 @@ main {
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
+/* Featured Properties */
 .featured-properties-title {
     font-size: 2rem;
     margin-bottom: 1.5rem;
@@ -108,10 +142,7 @@ main {
     color: #007bff;
 }
 
-.property-price,
-.property-transaction-type,
-.property-antiquity,
-.property-owner {
+.property-price, .property-transaction-type, .property-antiquity, .property-owner {
     margin: 0.5rem 0;
 }
 
@@ -129,7 +160,7 @@ main {
     margin-top: 1rem;
 }
 
-.button {
+.button, .schedule-btn, .submit-button {
     display: inline-block;
     padding: 0.5rem 1rem;
     border: none;
@@ -140,18 +171,19 @@ main {
     font-size: 0.9rem;
     text-align: center;
     transition: background-color 0.3s, transform 0.2s;
-    margin-right: 0.5rem;
+    cursor: pointer;
 }
 
-.button:hover {
+.button:hover, .schedule-btn:hover, .submit-button:hover {
     background-color: #0056b3;
     transform: scale(1.05);
 }
 
-.button:active {
+.button:active, .schedule-btn:active, .submit-button:active {
     transform: scale(0.95);
 }
 
+/* Carousel */
 .carousel {
     position: relative;
 }
@@ -162,68 +194,420 @@ main {
     border-radius: 4px;
 }
 
-.carousel-control-prev,
-.carousel-control-next {
+.carousel-control-prev, .carousel-control-next {
     width: 5%;
 }
 
-.carousel-control-prev-icon,
-.carousel-control-next-icon {
+.carousel-control-prev-icon, .carousel-control-next-icon {
     background-color: #007bff;
     border-radius: 50%;
 }
 
-.site-header {
+/* Agents */
+.agents-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 1rem;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.agents-container h2 {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    color: #333;
+    text-align: center;
+}
+
+.agent {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 1rem;
+}
+
+.agent img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 50%;
+    margin-right: 1rem;
+}
+
+.agent div {
+    flex: 1;
+}
+
+.agent h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #007bff;
+}
+
+.agent p {
+    margin: 0.5rem 0;
+    font-size: 1rem;
+}
+
+.agent p strong {
+    color: #333;
+}
+
+.edit-button, .delete-button {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    text-align: center;
+    transition: background-color 0.3s, color 0.3s;
+    margin-right: 0.5rem;
+}
+
+.edit-button {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.edit-button:hover {
+    background-color: #0056b3;
+}
+
+.delete-button {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+.delete-button:hover {
+    background-color: #c82333;
+}
+
+/* Add Agent */
+.add-agent-container, .property-add-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.add-agent-form, .property-form, .edit-agent-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    color: #333;
+    display: block;
+    font-weight: bold;
+}
+
+.form-input, .form-select, .form-textarea {
+    padding: 0.75rem;
+    font-size: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 98%;
+}
+
+.form-textarea {
+    resize: vertical;
+}
+
+.section-title, .page-title {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    color: #333;
+    text-align: center;
+}
+
+/* Interested List */
+.interested-list-container {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 1.5rem;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.contact-card {
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.contact-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.contact-name {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: #333;
+}
+
+.contact-detail {
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+    color: #555;
+}
+
+.contact-icon {
+    margin-right: 0.5rem;
+}
+
+.date-list {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.date-item {
+    font-size: 1rem;
+    color: #007bff;
+}
+
+/* Appointments */
+.appointments-main {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.appointments-container {
+    overflow-x: auto;
+}
+
+.appointments-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+}
+
+.appointments-caption {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: #333;
+    text-align: left;
+    padding: 0 1rem;
+}
+
+.appointments-header-row {
+    background: #007bff;
+    color: #fff;
+}
+
+.appointments-header-cell {
+    padding: 1rem;
+    text-align: center;
+    font-weight: bold;
+}
+
+.appointments-data-row {
+    border-bottom: 1px solid #ddd;
+}
+
+.appointments-data-cell {
+    padding: 1rem;
+    text-align: center;
+}
+
+.appointments-data-cell.date {
+    color: #007bff;
+}
+
+/* Footer */
+footer {
     background-color: #007bff;
     color: #fff;
     padding: 1rem 0;
-    position: fixed;
+    text-align: center;
+    position: relative;
+    bottom: 0;
     width: 100%;
-    top: 0;
-    left: 0;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    z-index: 1000;
 }
 
-.site-header-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 1rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.site-header-title {
+footer p {
     margin: 0;
+    font-size: 0.9rem;
+}
+
+/* Appointment Page */
+.appointment-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.page-title {
     font-size: 2rem;
+    margin-bottom: 1.5rem;
+    color: #333;
+    text-align: center;
 }
 
-.site-header-nav {
-    margin: 0;
-}
-
-.site-header-nav-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
+.appointment-form {
     display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
 }
 
-.site-header-nav-item {
-    margin: 0 1rem;
+.form-title {
+    font-size: 1.5rem;
+    color: #007bff;
 }
 
-.site-header-nav-link {
-    color: #fff;
-    text-decoration: none;
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-label {
     font-size: 1rem;
-    padding: 0.5rem 1rem;
-    border-radius: 5px;
-    transition: background-color 0.3s, color 0.3s;
+    color: #333;
+    display: block;
+    margin-bottom: 0.5rem;
 }
 
-.site-header-nav-link:hover {
-    background-color: #0056b3;
+.form-select {
+    padding: 0.75rem;
+    font-size: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 100%;
+    background: #f9f9f9;
+    transition: border-color 0.3s;
+}
+
+.form-select:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+.submit-button {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    background-color: #007bff;
     color: #fff;
+    text-align: center;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.submit-button:hover {
+    background-color: #0056b3;
+    transform: scale(1.05);
+}
+
+.submit-button:active {
+    transform: scale(0.95);
+}
+
+/* Login Page Styles */
+.login-container {
+    max-width: 800px;
+    margin-top: 150px;
+    padding: 2rem;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.add-agent-container {
+    padding: 2rem;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.page-title {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    color: #333;
+    text-align: center;
+}
+
+.add-agent-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    color: #333;
+    display: block;
+    font-weight: bold;
+}
+
+.form-input {
+    padding: 0.75rem;
+    font-size: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 96%;
+}
+
+.submit-button {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    background-color: #007bff;
+    color: #fff;
+    text-align: center;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+    width: 100%;
+}
+
+.submit-button:hover {
+    background-color: #0056b3;
+    transform: scale(1.05);
+}
+
+.submit-button:active {
+    transform: scale(0.95);
+}
+
+.error-message {
+    margin-top: 1rem;
+    color: #dc3545;
+    font-size: 0.9rem;
+}
+
+.retry-link {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.retry-link:hover {
+    text-decoration: underline;
 }

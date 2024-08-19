@@ -3,31 +3,31 @@
 {% block title %}Lista de Interesados{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h2>Lista de Interesados</h2>
+<main class="interested-list-container">
+    <h2 class="page-title">Lista de Interesados</h2>
 
     {% for contact in contacts %}
     <div class="contact-card">
-        <div class="contact-details">
-            <h3>{{ contact.name }}</h3>
-            <p><strong><span class="contact-icon">📞</span>Teléfono:</strong> {{ contact.phone }}</p>
-            <p><strong><span class="contact-icon">📧</span>Email:</strong> {{ contact.email }}</p>
-            <p><strong><span class="contact-icon">💬</span>Mensaje:</strong> {{ contact.message }}</p>
+        <div class="contact-info">
+            <h3 class="contact-name">{{ contact.name }}</h3>
+            <p class="contact-detail"><strong><span class="contact-icon">📞</span>Teléfono:</strong> {{ contact.phone }}</p>
+            <p class="contact-detail"><strong><span class="contact-icon">📧</span>Email:</strong> {{ contact.email }}</p>
+            <p class="contact-detail"><strong><span class="contact-icon">💬</span>Mensaje:</strong> {{ contact.message }}</p>
             
-            <p><strong><span class="contact-icon">📅</span>Fechas Disponibles:</strong>
+            <p class="contact-detail"><strong><span class="contact-icon">📅</span>Fechas Disponibles:</strong>
             {% if contact.available_dates %}
-                <ul>
+                <ul class="date-list">
                     {% for date in contact.available_dates %}
-                        <li>{{ date }}</li>
+                        <li class="date-item">{{ date }}</li>
                     {% endfor %}
                 </ul>
             {% else %}
                 No disponible
             {% endif %}
             </p>
-            <a href="{{ url_for('schedule_appointment', contact_id=contact.id_str) }}" class="schedule-button">Programar Cita</a>
+            <a href="{{ url_for('schedule_appointment', contact_id=contact.id_str) }}" class="schedule-btn">Programar Cita</a>
         </div>
     </div>
     {% endfor %}
-</div>
+</main>
 {% endblock %}

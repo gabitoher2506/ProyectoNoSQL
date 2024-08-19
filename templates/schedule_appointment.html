@@ -1,26 +1,26 @@
 {% extends "base.html" %}
 
-{% block title %}Programar Cita{% endblock %}
+{% block title %}Agendar Cita{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h1>Programar Cita</h1>
-</div>
-<div class="container">
-    <div class="schedule-form">
-        <h2>Seleccione una Fecha</h2>
+<div class="container appointment-container">
+    <h1 class="page-title">Agendar Cita</h1>
+    <div class="appointment-form">
+        <h2 class="form-title">Selecciona una Fecha</h2>
         <form method="POST">
-            <label for="selected_date">Fecha:</label>
-            <select name="selected_date" id="selected_date" required>
-                {% if available_dates %}
-                    {% for date in available_dates %}
-                        <option value="{{ date }}">{{ date }}</option>
-                    {% endfor %}
-                {% else %}
-                    <option value="">No hay fechas disponibles</option>
-                {% endif %}
-            </select>
-            <button type="submit">Confirmar Cita</button>
+            <div class="form-group">
+                <label for="selected_date" class="form-label">Fecha:</label>
+                <select name="selected_date" id="selected_date" class="form-select" required>
+                    {% if available_dates %}
+                        {% for date in available_dates %}
+                            <option value="{{ date }}">{{ date }}</option>
+                        {% endfor %}
+                    {% else %}
+                        <option value="">No hay fechas disponibles</option>
+                    {% endif %}
+                </select>
+            </div>
+            <button type="submit" class="submit-button">Confirmar Cita</button>
         </form>
     </div>
 </div>

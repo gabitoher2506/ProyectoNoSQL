@@ -31,6 +31,9 @@ def index():
 
         property_list = []
         for property in properties:
+            agent_collection = db_connection.get_collection('Agent')
+            agent = agent_collection.find_one({'_id': property.get('agent_id')})
+
             image_urls = property.get('images', ['static/images/placeholder.jpg'])
             property_list.append({
                 'name': property.get('name', 'Nombre de la Propiedad'),
@@ -39,7 +42,8 @@ def index():
                 'antiquity': property.get('antiquity', 'Antigüedad'),
                 'owner': property.get('owner', 'Propietario'),
                 'images': image_urls,
-                'id': str(property.get('_id'))
+                'id': str(property.get('_id')),
+                'agent_id': str(agent.get('id_user')) if agent else None
             })
 
         db_connection.close()
@@ -48,6 +52,7 @@ def index():
 
     except Exception as e:
         return f"Error en la operación de MongoDB: {e}"
+
     
     
 @app.route('/login', methods=['GET', 'POST'])
@@ -166,23 +171,52 @@ def view_agents():
 
 @app.route('/view_interested')
 def view_interested():
-    db_connection = MongoDBConnection()
-    contact_collection = db_connection.get_collection('Contact')
+    if 'user_id' not in session:
+        return redirect(url_for('login'))  # Redirigir si no hay usuario en sesión
+    
+    user_id = session['user_id']
+    
+    try:
+        db_connection = MongoDBConnection()
+        contact_collection = db_connection.get_collection('Contact')
+        property_collection = db_connection.get_collection('Property')
+        agent_collection = db_connection.get_collection('Agent')
 
-    contacts = list(contact_collection.find())  # Obtener todos los contactos de la colección
+        # Obtener el id del agente correspondiente al usuario actual
+        agent = agent_collection.find_one({'id_user': ObjectId(user_id)})
+        
+        if not agent:
+            db_connection.close()
+            return "Agente no encontrado", 404
 
-    # Convertir la fecha de contacto a cadena en formato 'dd/mm/yyyy'
-    for contact in contacts:
-        if isinstance(contact.get('date_contact'), datetime):
-            contact['date_contact'] = contact['date_contact'].strftime('%d/%m/%Y')
-        else:
-            contact['date_contact'] = 'No disponible'
-        # Convertir _id a cadena para usar en la plantilla
-        contact['id_str'] = str(contact['_id'])
+        agent_id = agent.get('_id')
 
-    db_connection.close()
+        # Obtener las propiedades asociadas con el agente
+        properties = list(property_collection.find({'agent_id': agent_id}))
+        
+        # Obtener contactos relacionados con las propiedades del agente
+        property_ids = [property.get('_id') for property in properties]
+        contacts = list(contact_collection.find({'id_property': {'$in': property_ids}}))
 
-    return render_template('view_interested.html', contacts=contacts)
+        # Convertir la fecha de contacto a cadena en formato 'dd/mm/yyyy'
+        for contact in contacts:
+            if isinstance(contact.get('date_contact'), datetime):
+                contact['date_contact'] = contact['date_contact'].strftime('%d/%m/%Y')
+            else:
+                contact['date_contact'] = 'No disponible'
+            # Convertir _id a cadena para usar en la plantilla
+            contact['id_str'] = str(contact['_id'])
+
+        db_connection.close()
+
+        return render_template('view_interested.html', contacts=contacts)
+
+    except Exception as e:
+        db_connection.close()
+        return f"Error en la operación de MongoDB: {e}"
+
+
+
 
 @app.route('/schedule/<contact_id>', methods=['GET', 'POST'])
 def schedule_appointment(contact_id):
@@ -207,7 +241,7 @@ def schedule_appointment(contact_id):
             if not property_info:
                 return "No se encontró la propiedad asociada."
 
-            id_agent = property_info.get('id_agent')
+            id_agent = property_info.get('agent_id')
             if not id_agent:
                 return "No se encontró un agente asociado a la propiedad."
 
@@ -239,41 +273,57 @@ def schedule_appointment(contact_id):
 
 @app.route('/confirmed_appointments')
 def confirmed_appointments():
-    db_connection = MongoDBConnection()
-    appointment_collection = db_connection.get_collection('Appointments')
-    property_collection = db_connection.get_collection('Property')
-    agent_collection = db_connection.get_collection('Agent')
+    if 'user_id' not in session:
+        return redirect(url_for('login'))  # Redirigir si no hay usuario en sesión
+    
+    user_id = session['user_id']
+    
+    try:
+        db_connection = MongoDBConnection()
+        appointment_collection = db_connection.get_collection('Appointments')
+        property_collection = db_connection.get_collection('Property')
+        agent_collection = db_connection.get_collection('Agent')
 
-    # Obtener todas las citas confirmadas
-    appointments = appointment_collection.find({'status': 'confirmada'})
+        # Obtener el id del agente correspondiente al usuario actual
+        agent = agent_collection.find_one({'id_user': ObjectId(user_id)})
+        
+        if not agent:
+            db_connection.close()
+            return "Agente no encontrado", 404
 
-    # Lista para almacenar los detalles de cada cita
-    appointments_details = []
+        agent_id = agent.get('_id')
 
-    for appointment in appointments:
-        # Obtener detalles de la propiedad
-        property_info = property_collection.find_one({'_id': appointment['id_property']})
+        # Obtener todas las citas confirmadas asociadas al agente
+        appointments = appointment_collection.find({'status': 'confirmada', 'agent_id': agent_id})
 
-        # Obtener detalles del agente
-        agent_info = agent_collection.find_one({'_id': appointment['agent_id']})
+        # Lista para almacenar los detalles de cada cita
+        appointments_details = []
 
-        # Construir el diccionario con los detalles de la cita
-        appointment_detail = {
-            'property_name': property_info['name'] if property_info else 'N/A',
-            'agent_name': agent_info['name'] if agent_info else 'N/A',
-            'contact_name': appointment.get('name', 'N/A'),
-            'contact_phone': appointment.get('phone', 'N/A'),
-            'contact_email': appointment.get('email', 'N/A'),
-            'selected_date': appointment['selected_date'].strftime('%Y-%m-%d') if appointment.get('selected_date') else 'N/A',
-            'status': appointment['status']
-        }
+        for appointment in appointments:
+            # Obtener detalles de la propiedad
+            property_info = property_collection.find_one({'_id': appointment['id_property']})
 
-        appointments_details.append(appointment_detail)
+            # Construir el diccionario con los detalles de la cita
+            appointment_detail = {
+                'property_name': property_info['name'] if property_info else 'N/A',
+                'contact_name': appointment.get('name', 'N/A'),
+                'contact_phone': appointment.get('phone', 'N/A'),
+                'contact_email': appointment.get('email', 'N/A'),
+                'selected_date': appointment['selected_date'].strftime('%Y-%m-%d') if appointment.get('selected_date') else 'N/A',
+                'status': appointment['status']
+            }
 
-    db_connection.close()
+            appointments_details.append(appointment_detail)
 
-    # Renderizar la plantilla con los detalles de las citas
-    return render_template('confirmed_appointments.html', appointments=appointments_details)
+        db_connection.close()
+
+        # Renderizar la plantilla con los detalles de las citas
+        return render_template('confirmed_appointments.html', appointments=appointments_details)
+
+    except Exception as e:
+        db_connection.close()
+        return f"Error en la operación de MongoDB: {e}"
+
 
 @app.route('/delete_agent/<agent_id>')
 def delete_agent(agent_id):
@@ -442,6 +492,9 @@ def add_property():
     return render_template('add_property.html', agents=agents)
 @app.route('/edit_property/<property_id>', methods=['GET', 'POST'])
 def edit_property(property_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))  # Redirigir al login si no está autenticado
+
     db_connection = MongoDBConnection()
     property_collection = db_connection.get_collection('Property')
     agent_collection = db_connection.get_collection('Agent')
@@ -452,21 +505,19 @@ def edit_property(property_id):
         db_connection.close()
         return "Propiedad no encontrada", 404
 
-    # Verificar que el usuario tenga permiso para editar
-    if 'user_id' in session:
-        user_id = session['user_id']
-        
-        # Obtener el agente asociado a la propiedad
-        agent = agent_collection.find_one({'_id': property.get('agent_id')})
-        
-        if not agent:
-            db_connection.close()
-            return "Agente no encontrado", 404
-        
-        # Verificar si el usuario es el agente asociado
-        if agent.get('id_user') != ObjectId(user_id):
-            db_connection.close()
-            return "No tienes permiso para editar esta propiedad", 403
+    user_id = session['user_id']
+
+    # Obtener el agente asociado a la propiedad
+    agent = agent_collection.find_one({'_id': property.get('agent_id')})
+    
+    if not agent:
+        db_connection.close()
+        return "Agente no encontrado", 404
+    
+    # Verificar si el usuario es el agente asociado
+    if agent.get('id_user') != ObjectId(user_id):
+        db_connection.close()
+        return "No tienes permiso para editar esta propiedad", 403
 
     if request.method == 'POST':
         try:
@@ -497,6 +548,9 @@ def edit_property(property_id):
     return render_template('edit_property.html', property=property)
 @app.route('/delete_property/<property_id>')
 def delete_property(property_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))  # Redirigir al login si no está autenticado
+
     db_connection = MongoDBConnection()
     property_collection = db_connection.get_collection('Property')
     agent_collection = db_connection.get_collection('Agent')
@@ -507,21 +561,19 @@ def delete_property(property_id):
         db_connection.close()
         return "Propiedad no encontrada", 404
 
-    # Verificar que el usuario tenga permiso para eliminar
-    if 'user_id' in session:
-        user_id = session['user_id']
-        
-        # Obtener el agente asociado a la propiedad
-        agent = agent_collection.find_one({'_id': property.get('agent_id')})
-        
-        if not agent:
-            db_connection.close()
-            return "Agente no encontrado", 404
-        
-        # Verificar si el usuario es el agente asociado
-        if agent.get('id_user') != ObjectId(user_id):
-            db_connection.close()
-            return "No tienes permiso para eliminar esta propiedad", 403
+    user_id = session['user_id']
+
+    # Obtener el agente asociado a la propiedad
+    agent = agent_collection.find_one({'_id': property.get('agent_id')})
+    
+    if not agent:
+        db_connection.close()
+        return "Agente no encontrado", 404
+    
+    # Verificar si el usuario es el agente asociado
+    if agent.get('id_user') != ObjectId(user_id):
+        db_connection.close()
+        return "No tienes permiso para eliminar esta propiedad", 403
 
     try:
         property_collection.delete_one({'_id': ObjectId(property_id)})
@@ -531,7 +583,6 @@ def delete_property(property_id):
     except Exception as e:
         db_connection.close()
         return f"Error en la operación de MongoDB: {e}"
-
 
 if __name__ == '__main__':
     app.run(debug=True)
