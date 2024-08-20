@@ -5,9 +5,8 @@ MONGO_URI = "mongodb+srv://msolano80258:Francia9192@cluster0.6uxqadh.mongodb.net
 class MongoDBConnection:
     def __init__(self):
         try:
-            # Crear el cliente MongoDB usando la URI de configuración
             self.client = MongoClient(MONGO_URI)
-            self.db = self.client['ProyectoNosql']  # Reemplaza con el nombre de tu base de datos
+            self.db = self.client['ProyectoNosql']  
             print("Conexión a MongoDB exitosa")
         except errors.ConnectionError as e:
             print(f"Error al conectar a MongoDB: {e}")

@@ -3,7 +3,6 @@ from pymongo import MongoClient
 from bson import ObjectId
 from datetime import datetime
 
-# Utilizar la instancia de app desde app.py
 from app import app
 
 class MongoDBConnection:
@@ -28,7 +27,6 @@ def contacto(property_id):
             db_connection = MongoDBConnection()
             contact_collection = db_connection.get_collection('Contact')
 
-            # Obtener fechas disponibles del formulario
             available_dates = request.form.getlist('available_dates')
 
             contact_data = {
@@ -38,7 +36,7 @@ def contacto(property_id):
                 'phone': request.form['phone'],
                 'email': request.form['email'],
                 'message': request.form['message'],
-                'available_dates': available_dates  # Agregar fechas disponibles
+                'available_dates': available_dates  
             }
 
             contact_collection.insert_one(contact_data)

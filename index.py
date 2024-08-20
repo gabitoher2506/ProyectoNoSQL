@@ -87,10 +87,8 @@ def login():
 
 @app.route('/logout')
 def logout():
-    # Eliminar los datos de la sesión del usuario
     session.pop('user_id', None)
     session.pop('user_role', None)
-    # Redirigir al usuario a la página de inicio de sesión o de inicio
     return redirect(url_for('login'))
 
 
@@ -103,7 +101,7 @@ def add_agent():
         roles_collection = db_connection.get_collection('Rol')
         agents_collection = db_connection.get_collection('Agent')
         
-        # Asignar rol de "Agente"
+     
         role = roles_collection.find_one({"name": "Agente"})
         role_id = str(role['_id']) if role else None
 
@@ -111,7 +109,7 @@ def add_agent():
             db_connection.close()
             return render_template('add_agent.html', error='Rol de Agente no encontrado.')
 
-        # Crear nuevo usuario
+     
         new_user = {
             "password": request.form['password'],
             "birth_date": request.form['birth_date'],
@@ -122,22 +120,19 @@ def add_agent():
             "email": request.form['email'],
             "phone": request.form['phone'],
             "image": request.form['image'],
-            "role_id": ObjectId(role_id)  # Agregar role_id al usuario
+            "role_id": ObjectId(role_id)  
         }
         
-        # Insertar el nuevo usuario en la colección Users
         user_id = users_collection.insert_one(new_user).inserted_id
         
-        # Crear un nuevo documento en la colección Agent
         new_agent = {
             "id_user": ObjectId(user_id),
             "name": request.form['name'],
-            "salary": request.form['salary'],  # Suponiendo que se captura el salario en el formulario
-            "experience": request.form['experience'],  # Suponiendo que se captura la experiencia en el formulario
-            "hire_date": datetime.now()  # Fecha de contratación actual
+            "salary": request.form['salary'],  
+            "experience": request.form['experience'],  
+            "hire_date": datetime.now()  
         }
         
-        # Insertar el nuevo agente en la colección Agent
         agents_collection.insert_one(new_agent)
 
         db_connection.close()
@@ -151,15 +146,13 @@ def view_agents():
     agents_collection = db_connection.get_collection('Agent')
     users_collection = db_connection.get_collection('Users')
 
-    agents = list(agents_collection.find())  # Obtener todos los agentes de la colección
+    agents = list(agents_collection.find())  
 
-    # Combinar información de la colección de agentes con la colección de usuarios para obtener la imagen
     for agent in agents:
         user = users_collection.find_one({"_id": ObjectId(agent['id_user'])})
         if user:
             agent['image'] = user.get('image', '')
 
-        # Convertir la fecha de contratación a cadena en formato 'dd/mm/yyyy'
         if isinstance(agent.get('hire_date'), datetime):
             agent['hire_date'] = agent['hire_date'].strftime('%d/%m/%Y')
         else:
@@ -172,7 +165,7 @@ def view_agents():
 @app.route('/view_interested')
 def view_interested():
     if 'user_id' not in session:
-        return redirect(url_for('login'))  # Redirigir si no hay usuario en sesión
+        return redirect(url_for('login'))  
     
     user_id = session['user_id']
     
@@ -182,7 +175,6 @@ def view_interested():
         property_collection = db_connection.get_collection('Property')
         agent_collection = db_connection.get_collection('Agent')
 
-        # Obtener el id del agente correspondiente al usuario actual
         agent = agent_collection.find_one({'id_user': ObjectId(user_id)})
         
         if not agent:
@@ -191,20 +183,16 @@ def view_interested():
 
         agent_id = agent.get('_id')
 
-        # Obtener las propiedades asociadas con el agente
         properties = list(property_collection.find({'agent_id': agent_id}))
         
-        # Obtener contactos relacionados con las propiedades del agente
         property_ids = [property.get('_id') for property in properties]
         contacts = list(contact_collection.find({'id_property': {'$in': property_ids}}))
 
-        # Convertir la fecha de contacto a cadena en formato 'dd/mm/yyyy'
         for contact in contacts:
             if isinstance(contact.get('date_contact'), datetime):
                 contact['date_contact'] = contact['date_contact'].strftime('%d/%m/%Y')
             else:
                 contact['date_contact'] = 'No disponible'
-            # Convertir _id a cadena para usar en la plantilla
             contact['id_str'] = str(contact['_id'])
 
         db_connection.close()
@@ -231,12 +219,10 @@ def schedule_appointment(contact_id):
         try:
             selected_date = request.form['selected_date']
 
-            # Obtener `id_property` del contacto
             id_property = contact.get('id_property')
             if not id_property:
                 return "El contacto no tiene una propiedad asociada."
 
-            # Obtener `id_agent` usando `id_property`
             property_info = property_collection.find_one({'_id': ObjectId(id_property)})
             if not property_info:
                 return "No se encontró la propiedad asociada."
@@ -274,7 +260,7 @@ def schedule_appointment(contact_id):
 @app.route('/confirmed_appointments')
 def confirmed_appointments():
     if 'user_id' not in session:
-        return redirect(url_for('login'))  # Redirigir si no hay usuario en sesión
+        return redirect(url_for('login'))  
     
     user_id = session['user_id']
     
@@ -284,7 +270,6 @@ def confirmed_appointments():
         property_collection = db_connection.get_collection('Property')
         agent_collection = db_connection.get_collection('Agent')
 
-        # Obtener el id del agente correspondiente al usuario actual
         agent = agent_collection.find_one({'id_user': ObjectId(user_id)})
         
         if not agent:
@@ -293,17 +278,13 @@ def confirmed_appointments():
 
         agent_id = agent.get('_id')
 
-        # Obtener todas las citas confirmadas asociadas al agente
         appointments = appointment_collection.find({'status': 'confirmada', 'agent_id': agent_id})
 
-        # Lista para almacenar los detalles de cada cita
         appointments_details = []
 
         for appointment in appointments:
-            # Obtener detalles de la propiedad
             property_info = property_collection.find_one({'_id': appointment['id_property']})
 
-            # Construir el diccionario con los detalles de la cita
             appointment_detail = {
                 'property_name': property_info['name'] if property_info else 'N/A',
                 'contact_name': appointment.get('name', 'N/A'),
@@ -317,7 +298,6 @@ def confirmed_appointments():
 
         db_connection.close()
 
-        # Renderizar la plantilla con los detalles de las citas
         return render_template('confirmed_appointments.html', appointments=appointments_details)
 
     except Exception as e:
@@ -335,10 +315,8 @@ def delete_agent(agent_id):
     agent = agents_collection.find_one({"_id": ObjectId(agent_id)})
     
     if agent:
-        # Eliminar el agente
         agents_collection.delete_one({"_id": ObjectId(agent_id)})
 
-        # Eliminar el usuario relacionado
         users_collection.delete_one({"_id": ObjectId(agent['id_user'])})
 
     db_connection.close()
@@ -352,22 +330,20 @@ def edit_agent(agent_id):
     users_collection = db_connection.get_collection('Users')
 
     if request.method == 'POST':
-        # Actualizar los datos del agente
         updated_agent_data = {
             'salary': request.form['salary'],
             'experience': request.form['experience'],
-            'hire_date': request.form['hire_date'],  # Se guarda como str
+            'hire_date': request.form['hire_date'], 
             'name': request.form['name']
         }
         agents_collection.update_one({"_id": ObjectId(agent_id)}, {"$set": updated_agent_data})
 
-        # Actualizar los datos del usuario asociado
         user_id = request.form['user_id']
         updated_user_data = {
             'password': request.form['password'],
-            'birth_date': request.form['birth_date'],  # Se guarda como str
+            'birth_date': request.form['birth_date'],  
             'name': request.form['user_name'],
-            'identification': request.form.get('identification', ''),  # Se usa .get para evitar KeyError
+            'identification': request.form.get('identification', ''),  
             'email': request.form['email'],
             'phone': request.form['phone'],
             'image': request.form['image']
@@ -532,7 +508,7 @@ def edit_property(property_id):
 @app.route('/delete_property/<property_id>')
 def delete_property(property_id):
     if 'user_id' not in session:
-        return redirect(url_for('login'))  # Redirigir al login si no está autenticado
+        return redirect(url_for('login')) 
 
     db_connection = MongoDBConnection()
     property_collection = db_connection.get_collection('Property')
@@ -546,14 +522,12 @@ def delete_property(property_id):
 
     user_id = session['user_id']
 
-    # Obtener el agente asociado a la propiedad
     agent = agent_collection.find_one({'_id': property.get('agent_id')})
     
     if not agent:
         db_connection.close()
         return "Agente no encontrado", 404
     
-    # Verificar si el usuario es el agente asociado
     if agent.get('id_user') != ObjectId(user_id):
         db_connection.close()
         return "No tienes permiso para eliminar esta propiedad", 403
